@@ -1,3 +1,4 @@
+[toc]
 # Python学习笔记
 ## Linux环境搭建
 
