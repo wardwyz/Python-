@@ -1017,47 +1017,32 @@ In [11]: t = (1,2,3)*6
 In [12]: t
 Out[12]: (1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3)
 In [15]: t = (1,[1,1],4)
-In [16]: t[1][0]= 10
-In [17]: t
-Out[17]: (1, [10, 1], 4)
-
-In [1]: t1 = tuple(range(4))
-In [3]: t1
-Out[3]: (0, 1, 2, 3)
-In [4]: t1.index(2)
-Out[4]: 2
-In [8]: t1.count(2)
-Out[8]: 1
-In [9]: len(t1)
-Out[9]: 4
+In [16]: t[1][0] #元组索引
+In [17]: t[1][0] = 10 #元组更改
+#元组查询
+In [9]: t.index(1,0,2)  #查找元素，开始，结束
+In [11]: t.count(1) #返回匹配次数
+In [12]: len(t) #返回元素个数
+#元组为只读对象，所以没有增改删选项
 ```
+
+##### 命名元组namedtuple
 
 ```python
-In [18]: from collections import namedtuple
-In [19]: Point = namedtuple('_Point',['x','y'])
-In [20]: p = Point(11,22)
-In [21]: p.x
-Out[21]: 11
-In [22]: p.y
-Out[22]: 22
-In [23]: p.x
-Out[23]: 11
-In [24]: p.x + p.y
-Out[24]: 33
+from collections import namedtuple
+Point = namedtuple('_Point',['x','y'])
+p = Point(11,22)
+print(p.x,p.y)
+
+Student = namedtuple('Student','name age')  #后面的student仅为名称
+tom = Student('tom',20)
+jerry = Student('jerry',18)
+print(tom.name,tom.age)
 ```
 
-```python
-In [25]: student = namedtuple('Student','name age')
+#### tuple实验
 
-In [26]: tom = student('tom',20)
-
-In [27]: jerry = student('jerry',18)
-
-In [28]: tom.name
-Out[28]: 'tom'
-```
-
-接收三个数比较大小
+##### 接收三个数比较大小
 
 ```python
 #if else
@@ -1145,7 +1130,7 @@ nums.sort()
 print(nums)
 ```
 
-冒泡法
+##### 冒泡法
 
 ```python
 numlist = [
@@ -1155,37 +1140,33 @@ numlist = [
 nums = numlist[0]
 print(nums)
 length = len(nums)
-count_swag = 0
-count = 0
 for i in range(length):
     for j in range(length-i-1):
-        count += 1
         if nums[j]>nums[j+1]:
-            tmp = nums[j]
-            nums[j] = nums[j+1]
-            nums[j+1] = tmp
-            count_swag +=1
-print(nums,count_swag,count)
+            nums[j],nums[j+1] = nums[j+1],nums[j]
+print(nums)
 ```
 
-#### 字符串
+### 字符串
+
+#### 字符串定义
 
 ```python
-In [1]: s1 = 'string'
-In [2]: s1
-Out[2]: 'string'
-In [5]: s3 = r'hello \n'
-In [6]: s3
-Out[6]: 'hello \\n'   
+In [1]: s1 = 'string' #字符串定义
+In [5]: s3 = r'hello \n' #原始字符串
 In [11]: sql = """select * from user where name='tom' """
 In [12]: sql
 Out[12]: "select * from user where name='tom' "
-#字符串连接    
+In [26]: sql[1] #字符串索引
+In [31]: for c in sql:
+    ...:     print(c) #有序的字符集合
+In [33]: lst = list(sql) #可迭代
+#字符串连接
 In [18]: a = 'dkjt'
 In [19]: b = 'sdfkj'
 In [20]: a+b
 Out[20]: 'dkjtsdfkj'
-#字符串连接
+
 In [24]: a = 'abcd'
 In [25]: ','.join(a)
 Out[25]: 'a,b,c,d'
@@ -1210,7 +1191,7 @@ Out[38]: ["l'm ", 'a super student.']
 In [40]: 'ab c\n\nde fg\rkl\r\n'.splitlines()
 Out[40]: ['ab c', '', 'de fg', 'kl']   #行分隔符包括\n、\r\n、\r等
 In [41]: 'ab c\n\nde fg\rkl\r\n'.splitlines(True)
-Out[41]: ['ab c\n', '\n', 'de fg\r', 'kl\r\n']    
+Out[41]: ['ab c\n', '\n', 'de fg\r', 'kl\r\n']
 #partition(sep) -> (head, sep, tail)
 #rpartition(sep) -> (head, sep, tail)
 In [50]: s1 = "l'm a super student."
