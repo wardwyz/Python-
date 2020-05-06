@@ -324,7 +324,7 @@ if a < 5:
 ```
 
 ```python
-a = 5 
+a = 5
 if a <4:
     print('a is less than 4')
 elif a ==4 :
@@ -366,7 +366,6 @@ else:
         print(2)
     else:
         print(1)
-    
 ```
 
 #### 循环
@@ -680,7 +679,7 @@ In [66]: random.shuffle(lst) #打乱
 In [8]: random.sample([1,2,3,4],2)  #取K个元素
 ```
 
-#### 实验
+#### list实验
 
 ##### 求素数
 
@@ -1004,7 +1003,7 @@ print(list(zip(states,nums)))
 
 ### tuple元组
 
-#### 定义
+#### tuple的定义
 
 ```python
 In [1]: t = tuple()
