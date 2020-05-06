@@ -1,5 +1,5 @@
-[toc]
 # Python学习笔记
+
 ## Linux环境搭建
 
 - 安装git
@@ -23,11 +23,11 @@ readline-devel zlib-devel bzip2-devel
 
 - python账户下安装pyenv
 
-```shell 
-curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenvinstaller | bash            获取脚本	
+```shell
+curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenvinstaller | bash            获取脚本
 ```
 
-```shell 
+```shell
 #脚本内容
 #!/usr/bin/env bash
 
@@ -167,7 +167,7 @@ yum -y install lrzsz
 
 ```shell
 cd /home/python/.pyenv
-mkdir cache 
+mkdir cache
 rz 上传下载好的python安装包
 pyenv install 3.5.3 -v
 ```
@@ -177,7 +177,7 @@ pyenv install 3.5.3 -v
 ```shell
 [python@localhost ~]$ pyenv virtualenv 3.5.3 test353
 [python@localhost ~]mkdir wardtest
-[python@localhost wardtest]$ pyenv local test353 
+[python@localhost wardtest]$ pyenv local test353
 (test353) [python@localhost wardtest]$ pyenv version
 test353 (set by /home/python/wardtest/.python-version)
 (test353) [python@localhost wardtest]$ python -V
@@ -188,7 +188,7 @@ Python 3.5.3
 
 ```shell
 [python@localhost ~]$ mkdir .pip
-[python@localhost .pip]$ vim pip.conf 
+[python@localhost .pip]$ vim pip.conf
 [global]
 index-url=https://mirrors.aliyun.com/pypi/simple/
 trusted-host=mirrors.aliyun.com
@@ -197,8 +197,8 @@ trusted-host=mirrors.aliyun.com
 - 虚拟环境下安装软件
 
 ```shell
-(test353) [python@localhost wardtest]$ pip install ipython		//交互式python工具
-(test353) [python@localhost wardtest]$ pip install jupyter 		//web笔记本
+(test353) [python@localhost wardtest]$ pip install ipython  //交互式python工具
+(test353) [python@localhost wardtest]$ pip install jupyter   //web笔记本
 ```
 
 - jupyter
@@ -206,7 +206,7 @@ trusted-host=mirrors.aliyun.com
 ```shell
 [python@localhost ~]$ mkdir jupyter-test
 [python@localhost ~]$ cd jupyter-test
-[python@localhost jupyter-test]$ pyenv local test353 
+[python@localhost jupyter-test]$ pyenv local test353
 (test353) [python@localhost jupyter-test]$ pip install jupyter
 (test353) [python@localhost jupyter-test]$ jupyter notebook --ip=0.0.0.0
 ```
@@ -215,40 +215,47 @@ trusted-host=mirrors.aliyun.com
 
 ```shell
 pip freeze > /tmp/packs.txt
-pip install -r /tmp/packs.txt 
+pip install -r /tmp/packs.txt
 ```
 
 ## 基础语法
 
 ### 运算符
+
 #### 算数运算符
+
 ```shell
 +
 -
 *
-/	自然除法（3以后）
-//	整除
-%	取模
-**	幂运算
+/ 自然除法（3以后）
+// 整除
+% 取模
+** 幂运算
 ```
+
 #### 位运算符
+
 ```shell
-&	位与
-|	位或
-~	取反
-^	异或
-<<	向左位移
->>	向右位移
+& 位与
+| 位或
+~ 取反
+^ 异或
+<< 向左位移
+>> 向右位移
 ```
+
 ##### 原码、反码、补码，负数的表示法
+
 ```shell
-原码	5	0b101	
-        1	   0b1
-        -1	   -0b1
-反码	除符号位取反	 
-补码	正数是本身，负数符号位不变其余按位取反后+1
-负数	
+原码 5 0b101
+        1    0b1
+        -1    -0b1
+反码 除符号位取反  
+补码 正数是本身，负数符号位不变其余按位取反后+1
+负数
 ```
+
 #### 比较运算符
 
 ```shell
@@ -259,14 +266,16 @@ pip install -r /tmp/packs.txt
 <=
 >=
 ```
+
 #### 逻辑运算符
 
 ```shell
-and	与
-or 	或
-not	非
-短路运算	前面结果决定了总的结果
+and 与
+or  或
+not 非
+短路运算 前面结果决定了总的结果
 ```
+
 #### 赋值运算符
 
 ```shell
@@ -277,33 +286,43 @@ a = min(3,5)
 /=
 %=
 ```
+
 #### 成员运算符
 
 ```shell
 in
 not in
 ```
+
 #### 身份运算符
+
 ```shell
 is
 is not
 ```
+
 #### 优先级
+
 #### 表达式
 
-  - 算数表达式
-  - 逻辑表达式
-  - 赋值表达式
+- 算数表达式
+- 逻辑表达式
+- 赋值表达式
 
 ### 程序结构
+
 #### 顺序
+
 #### 分支
+
 ##### if语句
+
 ```python
 a = 4
 if a < 5:
     print('a is less than 5')
 ```
+
 ```python
 a = 5 
 if a <4:
@@ -313,7 +332,9 @@ elif a ==4 :
     else:
     print('a is bigger than 4')
 ```
+
 ##### 分支嵌套if……else……if…elif……else
+
 ```python
 a = 80
 if a < 0 :
@@ -325,8 +346,10 @@ else:
         print('right')
     else:
         print('too big')
-``` 
+```
+
 ##### 给定一个不超过5位的正数，判断其几位
+
 ```python
 a = int(input('>>>'))
 if a >=1000:
@@ -345,21 +368,28 @@ else:
         print(1)
     
 ```
+
 #### 循环
+
 ##### while
-##### for 
+
+##### for
+
 ```python
 for i in range(10):
 if not i%2:
     print(i)
 ```
+
 ##### continue
+
 ```python
 for i in range(10):
 if i & 1:
     continue
 print(i)
 ```
+
 ##### break
 
 ```python
@@ -370,17 +400,22 @@ for i in range(0,1000,7):
     if count >=20:
         break
 ```
+
 ##### continue\break
+
 ##### else
+
 ### 实验
+
 #### 判断不超过5位数的位数，一次打印个十百千万位
+
 ```python
 val = input('>>>')
 val = int(val)
 if val >=1000:
     if val>=10000:
         num = 5
-        
+
     else:
         num = 4
 else:
@@ -397,7 +432,9 @@ for i in range(num):
     print(a-n*10)
     a = n  
 ```
+
 #### 打印一个边长位n的正方形
+
 ```python
 n=int(input('>>>'))
 print('*'*n)
@@ -405,7 +442,9 @@ for i in range(n-2):
     print('*'+' '*(n-2)+'*')
 print('*'*n)
 ```
+
 #### 求1-5的阶乘和
+
 ```python
 a = 1
 sum = 0
@@ -414,7 +453,9 @@ for i in range(1,6):
     sum += a
 print(sum)
 ```
+
 #### 判断一个数是不是质数
+
 ```python
 num = int(input("请输入一个数字: "))
 
@@ -429,7 +470,9 @@ if num > 1:
 else:
    print(num,"不是质数")
 ```
+
 #### 打印九九乘法表
+
 ```python
 #正三角
 for i in range(1,10):
@@ -444,7 +487,9 @@ for i in range(1,10):
         line += '{}*{}={:<{}}'.format(i,j,i*j,2 if j<4 else 3)
     print("{:>66}".format(line))
 ```
+
 #### 打印菱形
+
 ```python
 n = 10
 for i in range(-n,n+1):
@@ -454,16 +499,20 @@ for i in range(-n,n+1):
         prespace = i
     print(' '*prespace + '*'*(2*n+1-prespace*2))
 ```
+
 #### 打印对顶三角形
+
 ```python
 n = 7
 e = n//2
 
 for i in range(-e,n-e):
-    prespace = -i if i<0 else i 
+    prespace = -i if i<0 else i
     print(' '*(e-prespace)+ '*'*(2*prespace+1))
 ```
+
 #### 打印闪电
+
 ```python
 for i in range(-3,4):
     if i <0:
@@ -471,7 +520,9 @@ for i in range(-3,4):
     elif  i >0:
         print(' '*3+'*'*(4-i))
 ```
+
 #### 打印斐波那契数列
+
 ```python
 #斐波那契数列由0和1开始，之后的斐波那契数就是由之前的两数相加而得出
 n = 0
@@ -502,7 +553,7 @@ else:
     while not count == 101:
         c = a+b
         a = b
-        b = c   
+        b = c
         count += 1
     print(c)
 ```
@@ -530,23 +581,24 @@ print(peach)
   - 字典dict
   
 ### 数字处理
+
 ```python
 round()  #四舍六入五取偶
->>> 3//2	向下取整
+>>> 3//2 向下取整
 1
 import math
 math.floor(2.5)  向下取整
 math.ceil(2.9)   向上取整
-math.sqrt(9) 	平方根
+math.sqrt(9)  平方根
 min(1,2,5)
 max(1,2,5)
-pow(2,3)	#x**y
+pow(2,3) #x**y
 #进制，返回字符串
->>> bin(10)		二进制
+>>> bin(10)  二进制
 '0b1010'
->>> oct(10)		八进制
+>>> oct(10)  八进制
 '0o12'
->>> hex(10)		十六进制
+>>> hex(10)  十六进制
 '0xa'
 
 >>> math.pi
@@ -554,7 +606,9 @@ pow(2,3)	#x**y
 >>> math.e
 2.718281828459045
 ```
+
 ### 类型判断
+
 ```python
 
 >>> a = 1
@@ -574,56 +628,61 @@ True
 >>> 1+True+0.3
 2.3
 ```
+
 ### list列表
+
 #### 定义
+
 ```python
 #列表list
-lst = [1,2,3,4,5,6]		#定义
-lst.index(1)		#索引
-lst.index(1,-1)		#负索引
-lst.count(1)		#计数
-len(lst)		#长度
+lst = [1,2,3,4,5,6]  #定义
+lst.index(1)  #索引
+lst.index(1,-1)  #负索引
+lst.count(1)  #计数
+len(lst)  #长度
 #修改
 In [7]: lst[5] = 9
 #增加/插入
-In [11]: lst.append(10)		#尾部追加，就地修改
-In [19]: lst.insert(2,5)	#插入
-In [33]: lst1.extend(lst)	#追加列表
+In [11]: lst.append(10)  #尾部追加，就地修改
+In [19]: lst.insert(2,5) #插入
+In [33]: lst1.extend(lst) #追加列表
 lst = [1,2,3]
 lst1 = [1,4,6]
-lst+ lst1		#列表相加
+lst+ lst1  #列表相加
 [1, 2, 3, 1, 4, 6]
-2* lst1		#乘以列表
+2* lst1  #乘以列表
 [1, 4, 6, 1, 4, 6]
 #删除
 In [36]: lst.remove(1)
 #弹出
-In [38]: lst.pop()		#随机弹出
-In [40]: lst.pop(2)		#从索引处弹出  
-In [43]: lst1.clear()	#清空 
-#反转    	
-In [47]: lst.reverse()	#元素反转
+In [38]: lst.pop()  #随机弹出
+In [40]: lst.pop(2)  #从索引处弹出  
+In [43]: lst1.clear() #清空
+#反转
+In [47]: lst.reverse() #元素反转
 #排序
-In [49]: lst.sort(key=None, reverse=False)	#key后接函数，reverse默认False正序
-#in 判断   
-In [61]: a in lst	#判断是否在    
+In [49]: lst.sort(key=None, reverse=False) #key后接函数，reverse默认False正序
+#in 判断
+In [61]: a in lst #判断是否在
 #复制
-lst1 = lst.copy()	#浅拷贝
+lst1 = lst.copy() #浅拷贝
 import copy
-lst2 = copy.deepcopy(lst)	#深拷贝
+lst2 = copy.deepcopy(lst) #深拷贝
 ```
 
 ```python
 #random 随机数
 In [1]: import random
-In [2]: random.randint(1,10)		#返回之间整数
-In [3]: random.choice(range(10))		#随机挑选一个
-In [4]: random.randrange(1,7,2)			#首 尾 步长 指定范围取
-In [66]: random.shuffle(lst)	#打乱
-In [8]: random.sample([1,2,3,4],2)		#取K个元素
+In [2]: random.randint(1,10)  #返回之间整数
+In [3]: random.choice(range(10))  #随机挑选一个
+In [4]: random.randrange(1,7,2)   #首 尾 步长 指定范围取
+In [66]: random.shuffle(lst) #打乱
+In [8]: random.sample([1,2,3,4],2)  #取K个元素
 ```
+
 #### 实验
-##### 求素数 
+
+##### 求素数
 
 ```python
 #一个数能被2开始到自己的平方根的正整数整除，就是合数
@@ -746,7 +805,7 @@ print(triangle)
 
 ```python
 #变体
-triangle = []	
+triangle = []
 n = 6
 for i in range(n):
     cur = [1]
@@ -805,7 +864,7 @@ for i in range(1,n):
     print(newline)
 ```
 
-```python 
+```python
 #对称性  优化
 triangle = []
 n = 6
@@ -832,7 +891,7 @@ for i in range(n):
         row[j], z =val , row[j]
         if i != 2*j:
             row[-j-offset]= val
-    print(row[:i+1])		#打印前i+1个元素
+    print(row[:i+1])  #打印前i+1个元素
 ```
 
 ```python
@@ -861,9 +920,9 @@ print(targets[2]//(targets[0]*targets[1]))
 
 ```python
 """
-1 2 3  		1 4 7
-4 5 6   ==> 2 5 8
-7 8 9       3 6 9
+1 2 3    1 4 7
+4 5 6 => 2 5 8
+7 8 9    3 6 9
 """
 matrix = [[1,2,3],[4,5,6],[7,8,9]]
 print(matrix)
@@ -875,11 +934,12 @@ for i,row in enumerate(matrix):
             matrix[j][i] = temp
 print(matrix)
 ```
+
 ```python
 """
 1 2 3      1 4
-4 5 6 >>>  2 5 
-           3 6 
+4 5 6 >>>  2 5
+           3 6
 """
 #算法1
 matrix = [[1,2,3],[4,5,6]]
@@ -888,7 +948,7 @@ for row in matrix:
     for i,col in enumerate(row):
         if len(tm) < i + 1:
             tm.append([])
-    
+
         tm[i].append(col)
 
 print(tm)
@@ -902,7 +962,9 @@ for i,row in enumerate(tm):
 
 print(tm)
 ```
+
 ##### 数字统计
+
 ```python
 #随机产生10个数字，数字范围[1,20]，统计重复的数字有几个，分别是什么，统计不重复的数字有几个，分别是哪些。
 import random
@@ -939,25 +1001,19 @@ print('same numbers = {1},counter ={0}'.format(len(samenums),samenums))
 print('diffnums numbers = {1},counter = {0}'.format(len(diffnums),diffnums))
 print(list(zip(states,nums)))
 ```
+
 ### tuple元组
+
+#### 定义
 
 ```python
 In [1]: t = tuple()
-In [2]: t
-Out[2]: ()
 In [3]: t = ()
-In [4]: t
-Out[4]: ()
 In [5]: t = tuple(range(1,7,2))
-In [6]: t
-Out[6]: (1, 3, 5)
-In [7]: t = (1,)
-In [8]: t
-Out[8]: (1,)
+In [7]: t = (1,)        #一个元素的元组
+#元组的乘
 In [9]: t*5
 Out[9]: (1, 1, 1, 1, 1)
-In [10]: type(t)
-Out[10]: tuple
 In [11]: t = (1,2,3)*6
 In [12]: t
 Out[12]: (1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3)
@@ -965,7 +1021,7 @@ In [15]: t = (1,[1,1],4)
 In [16]: t[1][0]= 10
 In [17]: t
 Out[17]: (1, [10, 1], 4)
-    
+
 In [1]: t1 = tuple(range(4))
 In [3]: t1
 Out[3]: (0, 1, 2, 3)
@@ -1113,7 +1169,7 @@ for i in range(length):
 print(nums,count_swag,count)
 ```
 
-####字符串
+#### 字符串
 
 ```python
 In [1]: s1 = 'string'
