@@ -1171,62 +1171,36 @@ In [24]: a = 'abcd'
 In [25]: ','.join(a)
 Out[25]: 'a,b,c,d'
 #字符串分割  
-In [29]: s1 = "l'm \ta super student."
-In [30]: s1
-Out[30]: "l'm \ta super student."
-In [31]: s1.split()
-Out[31]: ["l'm", 'a', 'super', 'student.']
-In [32]: s1.split('s')
-Out[32]: ["l'm \ta ", 'uper ', 'tudent.']
-In [33]: s1.split('super')
-Out[33]: ["l'm \ta ", ' student.']
-In [36]: s1.split(' ')
-Out[36]: ["l'm", '\ta', 'super', 'student.']
-In [37]: s1.split(' ',maxsplit=2)
-Out[37]: ["l'm", '\ta', 'super student.']
-In [38]: s1.split('\t',maxsplit=2)
-Out[38]: ["l'm ", 'a super student.']
-#rsplit 反向切
+In [31]: s1.split() #rsplit 反向切
+In [32]: s1.split('s') #按分隔符分隔
+In [37]: s1.split(' ',maxsplit=2) #maxsplit为分隔次数，-1为遍历
+In [7]: a.partition('s') #以分隔符，分割为三部分，分隔符必须指定
+In [10]: a.rpartition('s') #反向
 #行切
 In [40]: 'ab c\n\nde fg\rkl\r\n'.splitlines()
 Out[40]: ['ab c', '', 'de fg', 'kl']   #行分隔符包括\n、\r\n、\r等
 In [41]: 'ab c\n\nde fg\rkl\r\n'.splitlines(True)
 Out[41]: ['ab c\n', '\n', 'de fg\r', 'kl\r\n']
-#partition(sep) -> (head, sep, tail)
-#rpartition(sep) -> (head, sep, tail)
-In [50]: s1 = "l'm a super student."
-In [51]: s1.partition('abc')
-Out[51]: ("l'm a super student.", '', '')
 #大小写切换
-In [52]: s1.upper()
-Out[52]: "L'M A SUPER STUDENT."
-In [53]: s1.lower()
-Out[53]: "l'm a super student."
-In [54]: s1.swapcase()
-Out[54]: "L'M A SUPER STUDENT."
+In [52]: s1.upper() #大
+In [53]: s1.lower() #小
+In [54]: s1.swapcase() #交换
 #字符排版
-In [55]: s1.title()
-Out[55]: "L'M A Super Student."
-
-In [56]: s1.capitalize()
-Out[56]: "L'm a super student."
-    
-In [60]: s1.center(50)
-Out[60]: "               l'm a super student.               "   
-    
-In [61]: s1.zfill(50)
+In [55]: s1.title() #标题单词大写
+In [56]: s1.capitalize() #首字符大写
+In [60]: s1.center(50) #两边字符填充
+In [61]: s1.zfill(50) #左面字符填充
 Out[61]: "000000000000000000000000000000l'm a super student."
-
-In [62]: s1.ljust(50)
+In [62]: s1.ljust(50) #左对齐
 Out[62]: "l'm a super student.                              "
-
-In [63]: s1.rjust(50)
+In [63]: s1.rjust(50) #右对齐
 Out[63]: "                              l'm a super student."  
 #字符串修改
 In [64]: 'www.baidu.com'.replace('w','a')
 Out[64]: 'aaa.baidu.com'
 In [65]: 'www.baidu.com'.replace('w','a',2)
-Out[65]: 'aaw.baidu.com'    
+Out[65]: 'aaw.baidu.com'
+#去除特殊字符
 In [66]: s = "\r \n \t Hello Python \n \t"
 In [67]: s.strip()
 Out[67]: 'Hello Python'
@@ -1234,97 +1208,68 @@ In [1]: s = 'I am very very very sorry   '
 In [4]: s.strip('Iy')
 Out[4]: ' am very very very sorry   '
 In [5]: s.strip('Iy ')
-Out[5]: 'am very very very sorr'   
+Out[5]: 'am very very very sorr'
 In [6]: s.lstrip('I')
 Out[6]: ' am very very very sorry   '
 In [7]: s.rstrip('I')
 Out[7]: 'I am very very very sorry   '
 #字符查找
 In [9]: s.find('very')
-Out[9]: 5
-In [11]: s.find('very',5)
-Out[11]: 5
-In [15]: s.index('I')
-Out[15]: 0
-In [16]: s.count('y')
-Out[16]: 4  
+In [11]: s.find('very',5) #从5个字符开始
+In [33]: s.find('very') #反向
+In [15]: s.index('I') #返回位置
+In [16]: s.count('y') #次数统计
 #字符判断
-In [18]: s.endswith('very')
-Out[18]: False
-In [19]: s.startswith('I')
-Out[19]: True
-In [20]: s.startswith('i')
-Out[20]: False
-isalnum() -> bool 是否是字母和数字组成
-isalpha() 是否是字母
-isdecimal() 是否只包含十进制数字
-isdigit() 是否全部数字(0~9)
-isidentifier() 是不是字母和下划线开头，其他都是字母、数字、下划线
-islower() 是否都是小写
-isupper() 是否全部大写
-isspace() 是否只包含空白字符
+In [18]: s.endswith('very') #判断是否是结尾
+In [19]: s.startswith('I') #判断是否是开头
+isalnum() #是否是字母和数字组成
+isalpha() #是否是字母
+isdecimal() #是否只包含十进制数字
+isdigit() #是否全部数字(0~9)
+isidentifier() #是不是字母和下划线开头，其他都是字母、数字、下划线
+islower() #是否都是小写
+isupper() #是否全部大写
+isspace() #是否只包含空白字符
 #字符串格式化
-In [5]: 'I am %02d'%(20,)
-Out[5]: 'I am 20'
-In [6]: 'I am %02d % 10s'%(20,21)
-Out[6]: 'I am 20         21'
-In [7]: 'I like %s'%'Python'
-Out[7]: 'I like Python'
-In [8]: '%3.2f%% , 0x%x, 0X%02X' % (89.7654, 10, 15)
-Out[8]: '89.77% , 0xa, 0X0F'
-In [9]: "I am %-5d" % (20,)
-Out[9]: 'I am 20   '
-In [7]: 'I like %s'%'Python'
-Out[7]: 'I like Python'
-In [8]: '%3.2f%% , 0x%x, 0X%02X' % (89.7654, 10, 15)
-Out[8]: '89.77% , 0xa, 0X0F'
-In [9]: "I am %-5d" % (20,)
-Out[9]: 'I am 20   '
-In [10]: 'I am %s%%'%20
-Out[10]: 'I am 20%'
-In [10]: 'I am %s%%'%20
-Out[10]: 'I am 20%'
-#字符串格式化
-In [13]: "{}:{}".format('192.168.1.100',8888)
+In [13]: "{}:{}".format('192.168.1.100',8888) #位置参数
 Out[13]: '192.168.1.100:8888'
-In [15]: "{server} {1}:{0}".format(8888, '192.168.1.100', server='Web Server Info : ')
+In [15]: "{server} {1}:{0}".format(8888, '192.168.1.100', server='Web Server Info : ') #关键字
 Out[15]: 'Web Server Info :  192.168.1.100:8888'
-In [19]: '{0[0]}.{0[1]}'.format(('ward',1))
+In [19]: '{0[0]}.{0[1]}'.format(('ward',1)) #访问元素
 Out[19]: 'ward.1'
-In [26]:  from collections import namedtuple
+In [26]: from collections import namedtuple #对象访问
     ...: Point = namedtuple('Point','x y')
     ...: p = Point(4,5)
     ...: "{{{0.x},{0.y}}}".format(p)
-Out[26]: '{4,5}'    
+Out[26]: '{4,5}'
 #对齐
-In [27]: '{0}*{1}={2:<2}'.format(3,2,2*3)
+^, <, > 分别是居中、左对齐、右对齐，后面带宽度， : 号后面带填充的字符，只能是一个字符，不指定则默认是用空格填充。+ 表示在正数前显示 +，负数前显示 -；  （空格）表示在正数前加空格
+In [27]: '{0}*{1}={2:<2}'.format(3,2,2*3) #左对齐，用空格补齐两位
 Out[27]: '3*2=6 '
-In [28]: '{0}*{1}={2:<02}'.format(3,2,2*3)
+In [28]: '{0}*{1}={2:<02}'.format(3,2,2*3) #左对齐，用0补齐两位
 Out[28]: '3*2=60'
-In [29]: '{0}*{1}={2:>02}'.format(3,2,2*3)
+In [29]: '{0}*{1}={2:>02}'.format(3,2,2*3) #右对齐，用0补齐两位
 Out[29]: '3*2=06'
-In [30]: '{:^30}'.format('centered')
+In [30]: '{:^30}'.format('centered') #居中，用空格补齐30为
 Out[30]: '           centered           '
 In [31]: '{:*^30}'.format('centered')
 Out[31]: '***********centered***********'
-#进制
+#进制 b、d、o、x 分别是二进制、十进制、八进制、十六进制。
 In [32]: "int: {0:d}; hex: {0:x}; oct: {0:o}; bin: {0:b}".format(42)
 Out[32]: 'int: 42; hex: 2a; oct: 52; bin: 101010'
-
 In [33]: "int: {0:d}; hex: {0:#x}; oct: {0:#o}; bin: {0:#b}".format(42)
 Out[33]: 'int: 42; hex: 0x2a; oct: 0o52; bin: 0b101010'
-
 In [34]: octets = [192, 168, 0, 1]
     ...: '{:02X}{:02X}{:02X}{:02X}'.format(*octets)
 Out[34]: 'C0A80001'
 ```
 
-实验
+#### 字符串实验
+
+##### 判断是几位，打印每一位数字及其重复次数
 
 ```python
 #输入一个数字
-#判断是几位
-#打印每一位数字及其重复次数
 #依次打印每一位数字，个十百千万
 mun = ''
 while True:
@@ -1369,8 +1314,9 @@ for i in range(len(counter)):
         print(' the count of {} is {}'.format(i,counter[i]))
 ```
 
+##### 输入5个数字，打印每个数字的位数，将这些数字排序打印，要求升序打印
+
 ```python
-#输入5个数字，打印每个数字的位数，将这些数字排序打印，要求升序打印
 nums = []
 while len(nums) < 5:
     num = input('Please input a number: ').strip().lstrip('0')
@@ -1386,7 +1332,7 @@ lst = nums.copy()
 lst.sort()
 print(lst)
 
-#maopao
+#冒泡法
 for i in range(len(nums)):
     flag = False
     for j in range(len(nums)-i-1):
@@ -1417,14 +1363,14 @@ Out[11]: b'abc'
 
 In [12]: 'abc'.encode()
 Out[12]: b'abc'
-    
+
 In [13]: a='abc'.encode()
 
 In [14]: type(a)
 Out[14]: bytes
 
 In [15]: a.decode()
-Out[15]: 'abc'    
+Out[15]: 'abc'
 ```
 
 #### 切片操作
