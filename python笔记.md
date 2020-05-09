@@ -1245,7 +1245,7 @@ Out[26]: '{4,5}'
 #对齐
 ^, <, > 分别是居中、左对齐、右对齐，后面带宽度， : 号后面带填充的字符，只能是一个字符，不指定则默认是用空格填充。+ 表示在正数前显示 +，负数前显示 -；  （空格）表示在正数前加空格
 In [27]: '{0}*{1}={2:<2}'.format(3,2,2*3) #左对齐，用空格补齐两位
-Out[27]: '3*2=6 '
+Out[27]: '3*2=6 '.
 In [28]: '{0}*{1}={2:<02}'.format(3,2,2*3) #左对齐，用0补齐两位
 Out[28]: '3*2=60'
 In [29]: '{0}*{1}={2:>02}'.format(3,2,2*3) #右对齐，用0补齐两位
@@ -1348,178 +1348,57 @@ print(nums)
 
 ### bytes\bytearry
 
+#### bytes\bytearry定义
+
+bytes 不可变字节序列
+
 ```python
-In [7]: bytes(range(100))
-Out[7]: b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abc'
-
-In [8]: bytes([1,3,5])
-Out[8]: b'\x01\x03\x05'
-
-In [9]: bytes([91,93,95])
-Out[9]: b'[]_'
-
-In [11]: bytes('abc','utf8')
-Out[11]: b'abc'
-
-In [12]: 'abc'.encode()
-Out[12]: b'abc'
-
+In [8]: bytes([1,3,5]) #定义
+In [11]: bytes('abc','utf8') #编码形式
+In [8]: b'abcdef'.replace(b'f',b'k') #替换
+In [9]: b'abc'.find(b'b') #查找
+In [10]: bytes.fromhex('6162 09 6a 6b00') #类方法
+In [12]: 'abc'.encode() #字节编码
 In [13]: a='abc'.encode()
-
-In [14]: type(a)
-Out[14]: bytes
-
-In [15]: a.decode()
-Out[15]: 'abc'
+In [15]: a.decode() #字节解码
+In [11]: 'abc'.encode().hex() #十六进制
+In [16]: b'abcdef'[2] #索引
 ```
 
-#### 切片操作
+bytearry 可变字节数组
+
+```python
+In [22]: bytearray(b'abc') #定义
+In [26]: bytearray(b'abcdef').replace(b'f',b'k') #将f换为k
+In [27]: bytearray(b'abcdef').find(b'b') #索引
+In [31]: bytearray.fromhex('6162 09 ') #十六进制编码
+In [32]: bytearray('abc'.encode()).hex() #返回十六进制
+In [33]: bytearray(b'abcd')[3] #索引
+In [42]: b.append(97) #追加
+In [44]: b.insert(1,98) #插入
+In [46]: b.extend([65,66]) #追加可迭代对象
+In [48]: b.remove(66) #移除
+In [50]: b.pop() #弹出
+In [51]: b.reverse() #反转
+In [53]: b.clear() #清空
+
+```
+
+#### bytes\bytearry实验
+
+##### 切片操作
 
 ```python
 In [2]: 'www.ward.com'[4:8]
 Out[2]: 'ward'
 In [3]: 'www.ward.com'[4:-4]
 Out[3]: 'ward'
-In [4]: 'www.ward.com'[4:8:2]
+In [4]: 'www.ward.com'[4:8:2] #首尾步长
 Out[4]: 'wr'
 
 ```
 
-实验
-
-1. 求杨辉三角第N行第K列的值
-
-```python
-#算法1
-m = int(input('第几行>>>'))
-k = int(input('第几个>>>'))
-triangle = []
-for i in range(m):
-    row = [1]
-    triangle.append(row)
-    if i == 0:
-        continue
-    for j in range(1,i):
-        row.append(triangle[i-1][j-1]+triangle[i-1][j])
-    row.append(1)
-print(triangle)
-print('_________')
-print(triangle[m-1][k-1])
-print('_________')
-#算法二
-#根据杨辉三角定理，第N行的M个数表示为C（n-1,m-1）=m!/(n!(m-n)!)
-m = int(input('第几行>>>'))
-k = int(input('第几个>>>'))
-n = m - 1
-r = k - 1
-d = n - r
-targets = []
-factorial = 1
-for i in range(1,n+1):
-    factorial *= i
-    if i == r :
-        targets.append(factorial)
-    if i == d :
-        targets.append(factorial)
-    if i == n :
-        targets.append(factorial)
-print(targets[2]//targets[0]*targets[1])
-```
-
-2. 矩阵
-
-```python
-#给定一个3*3方阵，求其转置矩阵
-#1 2 3         1 4 7
-#4 5 6   >>>   2 5 8
-#7 8 9         3 6 9
-matrix = [[1,2,3],[4,5,6],[7,8,9]]
-print(matrix)
-count = 0
-for i,row in enumerate(matrix):
-    for j,col in enumerate(row):
-        if i < j :
-            temp = matrix[i][j]
-            matrix[i][j]=matrix[j][i]
-            matrix[j][i]=temp
-            count +=1
-print(matrix)
-print(count)
-```
-
-```python
-#1 2 3    1 4
-#4 5 6 >> 2 5
-#         3 6
-#方法1
-import datetime
-matrix = [[1,2,3],[4,5,6]]
-tm = []
-count = 0
-for row in matrix:
-    for i,col in enumerate(row):
-        if len(tm)<i + 1:
-            tm.append([])
-        tm[i].append(col)
-        count += 1
-
-print(matrix)
-print(tm)
-print(count)
-#方法2
-matrix = [[1,2,3],[4,5,6]]
-tm = [[0 for col in range(len(matrix))] for row in range(len(matrix[0]))]
-count = 0
-
-for i,row in enumerate(tm):
-    for j,col in enumerate(row):
-        tm[i][j] = matrix[j][i]
-        count += 1
-
-print(matrix)
-print(tm)
-print(count)
-```
-
-3. 随机数
-
-```python
-#产生10个随机数，[1,20],统计重复的数字有几个，不重复的数字有几个
-import random
-nums = []
-for _ in range(10):
-    nums.append(random.randrange(21))
-
-print('Origin numbers = {}'.format(nums))
-print()
-
-length = len(nums)
-samenums = []
-diffnums = []
-states = [0]*length
-
-for i in range(length):
-    flag = False
-    if states[i] == 1:
-        continue
-    for j in range(i+1,length):
-        if states[j]==1:
-            continue
-        if nums[i] == nums[j]:
-            flag = True
-            states[j]= 1
-    if flag:
-        samenums.append(nums[i])
-        states[i] = 1
-    else:
-        diffnums.append(nums[i])
-
-print('same numbers = {1},conter = {0}'.format(len(samenums),samenums))
-print('different numbers ={1},conter = {0}'.format(len(diffnums),diffnums))
-print(list(zip(states,nums)))
-```
-
-####封装和解构
+### 封装和解构
 
 ```python
 In [12]: a
