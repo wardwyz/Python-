@@ -1401,34 +1401,14 @@ Out[4]: 'wr'
 ### 封装和解构
 
 ```python
-In [12]: a
-Out[12]: 4
-
-In [13]: b
-Out[13]: 5
-
-In [14]: a,b = b,a
-
-In [15]: a
-Out[15]: 5
-
-In [16]: b
-Out[16]: 4
+In [14]: a,b = b,a #左面封装，右面解构。元素互换
 ```
 
 ```python
-#从lst=[1,(2,3,4),5]中提取出4
-lst = [1,(2,3,4),5]
-a,(b,c,d),e = lst
-print(a,b,c,d,e)
-
-_,(*_,val),*_ = lst
+_,[*_,val],*_ =lst #元素解构
 print(val)
 
-_,[*_,val],*_ =lst
-print(val)
-
-#环境变量JAVA_HOME =/usr/bin 返回变量名和路径
+#例：环境变量JAVA_HOME =/usr/bin 返回变量名和路径
 key,_,val = 'JAVA_HOME=/usr/nim'.partition('=')
 print(key)
 print(val)
@@ -1436,236 +1416,59 @@ print(val)
 
 ### 集合
 
+#### 集合定义
+
+可变、无序、不重复、元素必须可hash、不可修改、不可索引、效率优于list
+
+可hash的类型：数值型 int\float\complex、布尔型 True\False、字符串 string\bytes
+、tuple、None、不可变类型可hash
+
 ```python
-#定义set
-In [2]: a= set()
-
-In [3]: a
-Out[3]: set()
-
-In [4]: b = set(range(5))
-
-In [5]: b
-Out[5]: {0, 1, 2, 3, 4}
-
-In [6]: set(list(range(5)))
-Out[6]: {0, 1, 2, 3, 4}
-
-In [7]: c = {}
-
-In [8]: c
-Out[8]: {}
-
-In [9]: d = {1,2,3,4}
-
-In [10]: d
-Out[10]: {1, 2, 3, 4}
-
-#set元素必须可hash
-"""
-可hash
-	数值型 int\float\complex
-	布尔型 True\False
-	字符串 string\bytes
-	tuple
-	None
-	不可变类型可hash
-"""
-In [17]: a = {[1],(1,),1}
----------------------------------------------------------------------------
-TypeError                                 Traceback (most recent call last)
-<ipython-input-17-5890222d9494> in <module>
-----> 1 a = {[1],(1,),1}
-
-TypeError: unhashable type: 'list'
-#set增加 
-In [18]: a = {1,2,3,4}
-
-In [19]: a
-Out[19]: {1, 2, 3, 4}
-
-In [20]: a.add(5)
-
-In [21]: a
-Out[21]: {1, 2, 3, 4, 5}
-
-In [22]: b = {6,7,8}
-
-In [23]: a.update(b)
-
-In [24]: a
-Out[24]: {1, 2, 3, 4, 5, 6, 7, 8}
-#set删除
-In [26]: a.remove(8)
-
-In [27]: a.remove(9)
----------------------------------------------------------------------------
-KeyError                                  Traceback (most recent call last)
-<ipython-input-27-172c07d3db5c> in <module>
-----> 1 a.remove(9)
-
-KeyError: 9
-
+In [2]: a= set() #初始化
+In [7]: c = {} #初始化
+In [20]: a.add(5) #增加
+In [23]: a.update(b) #合并其他集合
+In [26]: a.remove(8) #删除，不存在报错
 In [28]: a.discard(7)   #删除一个 若没有 不报错
-
-In [29]: a.discard(7)
-
-In [30]: a
-Out[30]: {1, 2, 3, 4, 5, 6}
-
-In [31]: a.pop()   #返回任意元素
-Out[31]: 1
-
-In [32]: a.pop()
-Out[32]: 2
-
-In [33]: a
-Out[33]: {3, 4, 5, 6}
-
-In [34]: a.clear()
-
-In [35]: a
-Out[35]: set()
-#修改、查询
-#不可修改
-#不可索引
-#可以遍历，迭代所有元素
-#set的效率优于list
-In [40]: %%timeit lst1 = list(range(100))
-    ...: a = -1 in lst1
-932 ns ± 4.01 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
-
-In [41]: %%timeit set1 = set(range(100))
-    ...: a = -1 in set1
-26.3 ns ± 0.341 ns per loop (mean ± std. dev. of 7 runs, 10000000 loops each)
+In [31]: a.pop()   #弹出
+In [34]: a.clear() #清空
+in 、not in 判断元素是否在set中
 ```
 
 ```python
-#集合
 #并集
-In [42]: a = {1,2,3}
-
-In [43]: b = {2,3,4}
-
-In [44]: a.union(b)
-Out[44]: {1, 2, 3, 4}
-
-In [45]: a|b
-Out[45]: {1, 2, 3, 4}
-
-In [46]: a.update(b)
-
-In [47]: c=a.update(b)
-
-In [48]: c
-
-In [49]: a
-Out[49]: {1, 2, 3, 4}
-
-In [50]: b
-Out[50]: {2, 3, 4}
-
-In [51]: a |= b
-
-In [52]: a
-Out[52]: {1, 2, 3, 4}
+In [44]: a.union(b) #返回新元素
+In [45]: a|b #等同上
+In [46]: a.update(b) #就地修改
+In [51]: a |= b #同上
 #交集
-In [53]: a
-Out[53]: {1, 2, 3, 4}
-
-In [54]: b
-Out[54]: {2, 3, 4}
-
-In [55]: a.intersection(b)
-Out[55]: {2, 3, 4}
-
+In [55]: a.intersection(b) #返回交集
 In [56]: a&b
-Out[56]: {2, 3, 4}
-
-In [57]: a.intersection_update(b)
-
-In [58]: a
-Out[58]: {2, 3, 4}
-
+In [57]: a.intersection_update(b) #就地修改
 In [59]: a&=b
-
-In [60]: a
-Out[60]: {2, 3, 4}
-#差集
-In [63]: a = {1,2,3,4}
-
-In [64]: b = {3,4,5,6,7}
-
-In [65]: a.difference(b)
-Out[65]: {1, 2}
-
-In [66]: a
-Out[66]: {1, 2, 3, 4}
-
+#差集：属于前者不属于后者
+In [65]: a.difference(b) #返回差集
 In [67]: a-b
-Out[67]: {1, 2}
-
-In [68]: a.difference_update(b)
-
-In [69]: a
-Out[69]: {1, 2}
-
-In [70]: a = {1,2,3,4}
-
+In [68]: a.difference_update(b) #就地修改
 In [71]: a-=b
-
-In [72]: a
-Out[72]: {1, 2}
-#对称差集
-In [73]: a = {1,2,3,4}
-
-In [74]: b= {3,4,5,6,7}
-
-In [75]: a.symmetric_difference(b)
-Out[75]: {1, 2, 5, 6, 7}
-
+#对称差集：不属于两者
+In [75]: a.symmetric_difference(b) #对称差集
 In [76]: a^b
-Out[76]: {1, 2, 5, 6, 7}
-
-In [77]: a.symmetric_difference_update(b)
-
-In [78]: a
-Out[78]: {1, 2, 5, 6, 7}
-
-In [79]: a = {1,2,3,4}
-
+In [77]: a.symmetric_difference_update(b) #就地修改
 In [80]: a^=b
-
-In [81]: a
-Out[81]: {1, 2, 5, 6, 7}
 #集合运算
-In [1]: a = {1,2,3,4,5}
-
-In [2]: b = {2,3,4}
-#判断当前集合是否是后面的子集	
-In [3]: a.issubset(b)  		
-Out[3]: False
-
-In [4]: b.issubset(a)
-Out[4]: True
-
-In [5]: b<=a
-Out[5]: True
-#判断前面的是不是后面的真子集
-In [6]: b<a
-Out[6]: True
-#判断前面的是否是后面的超集
+In [3]: a.issubset(b) #判断当前集合是否是后面的子集
+In [5]: b<=a #同上
+In [6]: b<a #判断前面的是不是后面的真子集
+In [9]: a.issuperset(b) #判断前面的是否是后面的超集
 In [7]: a >= b
-Out[7]: True
-In [9]: a.issuperset(b)
-Out[9]: True    
-#判断前面的是否是后面的真超集
-In [7]: a > b
-Out[7]: True
-#判断是否有交集 没有返回True
-In [10]: a.isdisjoint(b)
-Out[10]: False
+In [7]: a > b #判断前面的是否是后面的真超集
+In [10]: a.isdisjoint(b) #判断是否有交集 没有返回True
 ```
+
+#### 集合练习
+
+##### 选择排序
 
 ```python
 #简单的选择排序1
@@ -1782,110 +1585,73 @@ print(nums,count_swap,count_iter)
 
 ### 字典
 
+#### 字典定义
+
+可变、无序、key不重复
+
 ```python
-In [1]: d = {'a':1,'b':2}
+In [1]: d = {'a':1,'b':2} #定义
 #元素访问
-In [2]: d['a']		#不存在报error
-Out[2]: 1
-In [3]: d.get('a')		#不存在返回缺省值
-Out[3]: 1    
-In [4]: d.setdefault('a')		#不存在添加
-Out[4]: 1   
+In [2]: d['a'] #不存在报error
+In [3]: d.get('a') #不存在返回缺省值
+In [4]: d.setdefault('a') #不存在添加
 #增加与修改
-In [5]: d['c'] =3		#存在修改 不存在添加
-
-In [6]: a = {'a':2,'d':5}
-In [7]: d.update(a)		#不存在添加 存在覆盖
-In [8]: d
-Out[8]: {'a': 2, 'b': 2, 'c': 3, 'd': 5}    
+In [5]: d['c'] =3 #存在修改 不存在添加
+In [7]: d.update(a) #不存在添加 存在覆盖
 #删除
-In [9]: d.pop('a')		#存在移除 不存在返回默认（不存在报错）
-Out[9]: 2
-
-In [10]: d.popitem()	#返回任意一个
-Out[10]: ('b', 2)
-
-In [11]: d.clear()		#清空
+In [9]: d.pop('a') #存在移除 不存在返回默认（不存在报错）
+In [10]: d.popitem() #返回任意一个
+In [11]: d.clear() #清空
 #遍历
-In [13]: for k in d.keys():
+In [13]: for k in d.keys(): #遍历keys
     ...:     print(k)
-    ...:
-b
-a
 
-In [15]: for v in d.values():
+In [15]: for v in d.values(): #遍历values
     ...:     print(v)
-    ...:
-2
-1
 
-In [16]: for item in d.items():
+In [16]: for item in d.items(): #遍历items
     ...:     print(item)
-    ...:
-('b', 2)
-('a', 1)
+
 #遍历的同时移除
-In [17]: d = dict(a=1,b=2,c=3)
-
-In [18]: keys=[]
-
-In [19]: for k,v in d.items():
-    ...:     if isinstance(v,str):
-    ...:         keys.append(k)
-    ...:
-
-In [20]: for k in keys:
-    ...:     d.pop(k)
-    ...:
-
-In [21]: print(d)
-{'b': 2, 'c': 3, 'a': 1}
+d = dict(a=1,b=2,c='abc')
+keys = []
+for k,v in d.items():
+    if isinstance(v,str):
+        keys.append(k)
+for k in keys:
+    d.pop(k)
+print(d)
 #defaultdict   key不存在时会利用函数生成key对应的value
-In [22]: from collections import defaultdict
+from collections import defaultdict
+import random
 
-In [23]: import random
+d = defaultdict(list)
+for k in 'abcdef':
+    for i in range(random.randint(1,5)):
+        d[k].append(i)
 
-In [24]: d = defaultdict(list)
+print(d)
+#OrderedDict  记录输入的顺序
+from collections import OrderedDict
+import random
 
-In [25]: for k in 'abcde':
-    ...:     for i in range(random.randint(1,5)):
-    ...:         d[k].append(i)
-    ...:
-
-In [26]: print(d)
-#OrderedDict  	记录输入的顺序
-In [1]: from collections import OrderedDict
-
-In [2]: import random
-
-In [3]: d = dict(a=1,b=2,c=3)
-
-In [4]: print(d)
-{'a': 1, 'b': 2, 'c': 3}
-
-In [5]: keys = list(d.keys())
-
-In [6]: random.shuffle(keys)
-
-In [7]: print(keys)
-['c', 'a', 'b']
-
-In [8]: old = OrderedDict()
-
-In [10]: for key in keys:
-    ...:     old[key] = d[key]
-    ...:
-    ...:
-
-In [11]: print(old)
-OrderedDict([('c', 3), ('a', 1), ('b', 2)])
-
-In [12]: print(old.keys())
-odict_keys(['c', 'a', 'b'])
+d = {'banana': 3, 'apple': 4, 'pear': 1, 'orange': 2}
+print(d)
+keys = list(d.keys())
+random.shuffle(keys)
+print(keys)
+od = OrderedDict()
+for key in keys:
+    od[key] = d[key]
+print(od)
+print(od.keys())
 ```
 
+##### 字典实验
+
+###### 打印输入的数字的每一位及重复次数
+
 ```python
-#打印输入的数字的每一位及重复次数
 num = input('>>')
 #first way
 d = {}
@@ -1924,7 +1690,11 @@ for x in nums:
 print(d)
 d1 = sorted(d.items())
 print(d1)
-#字符串重复统计
+```
+
+###### 字符串重复统计
+
+```python
 import random
 alphabet = 'abcdefghijklmopqrstuvwxyz'
 
@@ -1943,7 +1713,7 @@ d1 = sorted(d.items(),reverse=True)
 print(d1)
 ```
 
-#### 解析式 生成器
+### 解析式 生成器
 
 ```python
 #datetime
@@ -1952,12 +1722,12 @@ In [16]: d = datetime.datetime.now()
 In [17]: d
 Out[17]: datetime.datetime(2020, 4, 16, 15, 1, 47, 721357)
 
-In [18]: d.weekday()	#周一0
+In [18]: d.weekday() #周一0
 Out[18]: 3
 In [20]: d.isoweekday()#周一1
-Out[20]: 4    
-In [19]: d.year	#year、month、day、hour、minute、second、microsecond
-Out[19]: 2020    
+Out[20]: 4
+In [19]: d.year #year、month、day、hour、minute、second、microsecond
+Out[19]: 2020
 In [21]: d.date()
 Out[21]: datetime.date(2020, 4, 16)
 In [22]: d.time()
@@ -1965,7 +1735,7 @@ Out[22]: datetime.time(15, 1, 47, 721357)
 In [23]: d.replace()
 Out[23]: datetime.datetime(2020, 4, 16, 15, 1, 47, 721357)
 In [24]: d.isocalendar()
-Out[24]: (2020, 16, 4)    
+Out[24]: (2020, 16, 4)
 #时间格式化
 In [26]: dt = datetime.datetime.strptime("21/11/06 16:30", "%d/%m/%y %H:%M")
 
@@ -1981,7 +1751,7 @@ Out[30]: datetime.datetime(2020, 4, 16, 15, 1, 47, 721357)
 In [31]: d - datetime.timedelta(1)
 Out[31]: datetime.datetime(2020, 4, 15, 15, 1, 47, 721357)
 In [33]: datetime.timedelta(1).total_seconds()#时间差总秒数
-Out[33]: 86400.0    
+Out[33]: 86400.0
 #time.sleep(secs) 将调用线程挂起指定的秒数  
 ```
 
