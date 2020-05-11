@@ -1670,6 +1670,7 @@ for c in num:
     else:
         d[c] += 1
 print(d)
+
 #数字重复统计
 import random
 n = 10
@@ -1715,84 +1716,61 @@ print(d1)
 
 ### 解析式 生成器
 
+#### 标准库datetime
+
 ```python
-#datetime
 In [13]: import datetime
-In [16]: d = datetime.datetime.now()
-In [17]: d
-Out[17]: datetime.datetime(2020, 4, 16, 15, 1, 47, 721357)
-
+In [16]: d = datetime.datetime.now() #获取当前时间
 In [18]: d.weekday() #周一0
-Out[18]: 3
 In [20]: d.isoweekday()#周一1
-Out[20]: 4
 In [19]: d.year #year、month、day、hour、minute、second、microsecond
-Out[19]: 2020
-In [21]: d.date()
-Out[21]: datetime.date(2020, 4, 16)
-In [22]: d.time()
-Out[22]: datetime.time(15, 1, 47, 721357)
-In [23]: d.replace()
-Out[23]: datetime.datetime(2020, 4, 16, 15, 1, 47, 721357)
-In [24]: d.isocalendar()
-Out[24]: (2020, 16, 4)
-#时间格式化
+In [21]: d.date() #返回日期
+In [22]: d.time() #返回时间
+In [23]: d.replace() #修改并返回新时间
+In [24]: d.isocalendar() #返回三元组
+#日期格式化
+In [13]: import datetime
 In [26]: dt = datetime.datetime.strptime("21/11/06 16:30", "%d/%m/%y %H:%M")
-
 In [27]: print("{0:%Y}/{0:%m}/{0:%d} {0:%H}::{0:%M}::{0:%S}".format(dt))
 2006/11/21 16::30::00
-
-In [28]: dt
-Out[28]: datetime.datetime(2006, 11, 21, 16, 30)
 #datetime.timedelta 时间差
 In [30]: d
 Out[30]: datetime.datetime(2020, 4, 16, 15, 1, 47, 721357)
-
 In [31]: d - datetime.timedelta(1)
-Out[31]: datetime.datetime(2020, 4, 15, 15, 1, 47, 721357)
 In [33]: datetime.timedelta(1).total_seconds()#时间差总秒数
 Out[33]: 86400.0
 #time.sleep(secs) 将调用线程挂起指定的秒数  
 ```
 
+#### 列表解析
+
 ```python
-#列表解析
-In [35]: l1 = list(range(10))
-
-In [36]: l2 = [(i+1)**2 for i in l1]
-
-In [37]: print(l2)
-[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
-
-In [38]: print(type(l2))
-<class 'list'>
-
-In [39]:   [{x: y} for x in 'abcde' for y in range(3)]
-Out[39]:
-[{'a': 0},
- {'a': 1},
- {'a': 2},
- {'b': 0},
- {'b': 1},
- {'b': 2},
- {'c': 0},
- {'c': 1},
- {'c': 2},
- {'d': 0},
- {'d': 1},
- {'d': 2},
- {'e': 0},
- {'e': 1},
- {'e': 2}]
-
+#普通表达
+l1 = list(range(10))
+l2 = []
+for i in l1:
+    l2.append((i+1)**2)
+print(l2)
+#列表解析表达
+l1 = list(range(10))
+l2 = [(i+1)**2 for i in l1]
+print(l2)
+#举例
+In [39]: [{x: y} for x in 'abcde' for y in range(3)]
 In [40]: [(i,j) for i in range(7) for j in range(20,25) if i>4 and j>23]
-Out[40]: [(5, 24), (6, 24)]
 ```
 
+##### 列表解析实验
+
+###### 打印乘法表
+
 ```python
-#打印九九乘法表
 [print('{}*{}={:<3}{}'.format(j,i,j*i,('\n' if i == j else ' ')),end='') for i in range(1,10) for j in range (1,i+1)]
-#生成ID
+```
+
+###### 生成ID
+
+```python
 import random
 ['{:<04}.{}'.format(n,''.join([random.choice(bytes(range(97,123)).decode()) for _ in range(10)])) for n in range(1,101)]
 
@@ -1804,44 +1782,85 @@ import string
 ['{:<04}.{}'.format(i,''.join(random.choice(string.ascii_lowercase) for _ in range(0,10))) for i in range(1,101)]
 ```
 
+#### 生成器
+
+```python
+#生成器
+g = ('{:04}'.format(i) for i in range(1,11))
+next(g)
+for x in g:
+    print(x)
+
+for x in g:
+    print(x)
+
+#特点：延迟计算、返回迭代器，可以迭代、从青岛后走完一遍不能回头
+
+#列表
+g = ['{:04}'.format(i) for i in range(1,11)]
+for x in g:
+    print(x)
+
+for x in g:
+    print(x)
+
+#特点：立即计算、返回的不是迭代器，返回可迭代列表、从前到后走完一遍可回头
+```
+
+#### 集合解析式
+
+```python
+{(x,x+1) for x in range(10)}
+```
+
+#### 字典解析式
+
+```python
+{x:(x,x+1) for x in range(10)}
+{x:[x,x+1] for x in range(10)}
+{(x,):[x,x+1] for x in range(10)}
+{chr(0x41+x):x**2 for x in range(10)}
+{str(x):y for x in range(3) for y in range(4)}
+```
+
 #### 内建函数
 
 ```python
 标识 id
-	返回对象的唯一标识，CPython返回内存地址
+返回对象的唯一标识，CPython返回内存地址
 哈希 hash()
-	返回一个对象的哈希值
+返回一个对象的哈希值
 类型 type()
-	返回对象的类型
+返回对象的类型
 类型转换
-	float() int() bin() hex() oct() bool() list() tuple() dict() set() complex() bytes() bytearray()
+float() int() bin() hex() oct() bool() list() tuple() dict() set() complex() bytes() bytearray()
 输入 input([prompt])
-	接收用户输入，返回一个字符串
+接收用户输入，返回一个字符串
 打印 print(*objects, sep=' ', end='\n', file=sys.stdout, flush=False)
-	打印输出，默认使用空格分割、换行结尾，输出到控制台
+打印输出，默认使用空格分割、换行结尾，输出到控制台
 对象长度 len(s)
-	返回一个集合类型的元素个数
+返回一个集合类型的元素个数
 isinstance(obj, class_or_tuple)
-	判断对象obj是否属于某种类型或者元组中列出的某个类型
-	isinstance(True, int)
+判断对象obj是否属于某种类型或者元组中列出的某个类型
+isinstance(True, int)
 issubclass(cls, class_or_tuple)
-	判断类型cls是否是某种类型的子类或元组中列出的某个类型的子类
-	issubclass(bool, int)
+判断类型cls是否是某种类型的子类或元组中列出的某个类型的子类
+issubclass(bool, int)
 绝对值abs(x) x为数值
 最大值max() 最小值min()
 round(x) 四舍六入五取偶，round(-0.5)
 pow(x , y) 等价于 x**y
 range(stop) 
-	从0开始到stop-1的可迭代对象；range(start, stop[, step])从start开始到stop-1结束步长为step的可迭代对象
+0开始到stop-1的可迭代对象；range(start, stop[, step])从start开始到stop-1结束步长为step的可迭代对象
 divmod(x, y) 等价于 tuple (x//y, x%y)
 sum(iterable[, start]) 对可迭代对象的所有数值元素求和
-	sum(range(1,100,2))
+sum(range(1,100,2))
 chr(i) 给一个一定范围的整数返回对应的字符
       p chr(97) chr(20013)
 ord(c) 返回字符对应的整数
 ord('a') ord('中')
 sorted(iterable[, key][, reverse]) 排序
-	返回一个新的列表，默认升序
+返回一个新的列表，默认升序
 	reverse是反转
 	sorted([1, 3, 5], reverse=True)
 	sorted({'c':1, 'b':2, 'a':1})
