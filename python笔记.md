@@ -1823,84 +1823,45 @@ for x in g:
 {str(x):y for x in range(3) for y in range(4)}
 ```
 
-#### 内建函数
+### 内建函数
 
 ```python
-标识 id
-返回对象的唯一标识，CPython返回内存地址
-哈希 hash()
-返回一个对象的哈希值
-类型 type()
-返回对象的类型
+标识 id #返回对象的唯一标识，CPython返回内存地址
+哈希 hash() #返回一个对象的哈希值
+类型 type() #返回对象的类型
 类型转换
 float() int() bin() hex() oct() bool() list() tuple() dict() set() complex() bytes() bytearray()
-输入 input([prompt])
-接收用户输入，返回一个字符串
-打印 print(*objects, sep=' ', end='\n', file=sys.stdout, flush=False)
-打印输出，默认使用空格分割、换行结尾，输出到控制台
-对象长度 len(s)
-返回一个集合类型的元素个数
-isinstance(obj, class_or_tuple)
-判断对象obj是否属于某种类型或者元组中列出的某个类型
-isinstance(True, int)
-issubclass(cls, class_or_tuple)
-判断类型cls是否是某种类型的子类或元组中列出的某个类型的子类
-issubclass(bool, int)
-绝对值abs(x) x为数值
-最大值max() 最小值min()
-round(x) 四舍六入五取偶，round(-0.5)
-pow(x , y) 等价于 x**y
-range(stop) 
-0开始到stop-1的可迭代对象；range(start, stop[, step])从start开始到stop-1结束步长为step的可迭代对象
-divmod(x, y) 等价于 tuple (x//y, x%y)
-sum(iterable[, start]) 对可迭代对象的所有数值元素求和
-sum(range(1,100,2))
-chr(i) 给一个一定范围的整数返回对应的字符
-      p chr(97) chr(20013)
-ord(c) 返回字符对应的整数
-ord('a') ord('中')
-sorted(iterable[, key][, reverse]) 排序
-返回一个新的列表，默认升序
-	reverse是反转
-	sorted([1, 3, 5], reverse=True)
-	sorted({'c':1, 'b':2, 'a':1})
-翻转 reversed(seq)
-	返回一个翻转元素的迭代器
-	list(reversed("13579"))
-	for x in reversed(['c','b','a']):
-  		 print(x)
-    reversed(sorted({1, 5, 9}))
-枚举 enumerate(seq, start=0)
-    迭代一个序列，返回索引数字和元素构成的二元组
-    start表示索引开始的数字，默认是0
-    for x in enumerate([2,4,6,8]):
-       print(x)
-
-    for x in enumerate("abcde"):
-    print(x,end=" ")
-迭代器和取元素 iter(iterable)、next(iterator[, default])
-    iter将一个可迭代对象封装成一个迭代器
-    next对一个迭代器取下一个元素。如果全部元素都取过了，再次next会抛StopIteration异常
-    it = iter(range(5))
-    next(it)
-    it = reversed([1,3,5])
-    next(it)
-拉链函数zip(*iterables)
-    像拉链一样，把多个可迭代对象合并在一起，返回一个迭代器
-    将每次从不同对象中取到的元素合并成一个元组
-    In [6]: list(zip(range(10),range(10),range(5),range(10)))
-    Out[6]: [(0, 0, 0, 0), (1, 1, 1, 1), (2, 2, 2, 2), (3, 3, 3, 3), (4, 4, 4, 4)]
-        
+输入 input([prompt]) #接收用户输入，返回一个字符串
+打印 print(*objects, sep=' ', end='\n', file=sys.stdout, flush=False) #打印输出，默认使用空格分割、换行结尾，输出到控制台
+对象长度 len(s) #返回一个集合类型的元素个数
+isinstance(obj, class_or_tuple) #判断对象obj是否属于某种类型或者元组中列出的某个类型
+issubclass(cls, class_or_tuple) #判断类型cls是否是某种类型的子类或元组中列出的某个类型的子类
+abs(x) #绝对值
+max() min() #最大值、最小值
+round(x) #四舍六入五取偶
+pow(x , y) #等价于 x**y
+range(start, stop[, step]) #起始步长
+divmod(x, y) #等价于 tuple (x//y, x%y)
+sum(iterable[, start]) #对可迭代对象的所有数值元素求和
+chr(i) #数值对应的ascii码
+ord(c) #ascii对应的数值
+sorted(iterable[, key][, reverse]) #排序
+reverse #反排序
+reversed(seq) #翻转
+enumerate(seq, start=0) #枚举
+iter(iterable) #将一个可迭代对象封装成一个迭代器
+next(iterator[, default]) #对一个迭代器取下一个元素。
+zip(*iterables) #拉链函数，把多个可迭代对象合并在一起，返回一个迭代器
 ```
 
-##函数
+## 函数
 
-#### 定义
+### 函数定义
 
 ```python
 #默认参数
 def add(x=4, y=5):
-	return x+y
+ return x+y
 #可变参数
 def add(*nums):
     sum = 0
@@ -1916,7 +1877,7 @@ def showconfig(**kwargs):
 def showconfig(username, *args, **kwargs)
 #keyword-only
 def fn(*args, x):
-def(**kwargs, x):   
+def(**kwargs, x):
 def fn(*, x,y):
 #解构
 In [8]:  def add(x,y):
@@ -1932,7 +1893,7 @@ In [12]: d = dict(x=5,y=6)
 In [13]: add(*d)
 Out[13]: 'yx'
 In [14]: add(**d)
-Out[14]: 11    
+Out[14]: 11
 ```
 
 ```python
@@ -1983,7 +1944,7 @@ for i in range(2,length):
             nums[j+1] = nums[j]
             j -= 1
         nums[j+1] = nums[0]
-nums.pop(0)        
+nums.pop(0)
 print(nums)
 ```
 
@@ -2004,7 +1965,7 @@ def fn(x):
     else:
         print("{} is not greater than 3".format(x))
 
-#函数嵌套	
+#函数嵌套
 """
 一个函数中定义了另一个函数称为函数嵌套
 内部函数不能被外部直接使用
@@ -2021,7 +1982,7 @@ def fn(x):
 
 ![image-20200419163925861](python%E7%AC%94%E8%AE%B0.assets/image-20200419163925861.png)
 
-2. 嵌套对比
+2.嵌套对比
 
 ![image-20200419164526977](python%E7%AC%94%E8%AE%B0.assets/image-20200419164526977.png)
 
@@ -2049,10 +2010,10 @@ nonlocal 将变量标记为不在本地作用域定义，而在上级作用于�
 """
 a = 50
 def counter():
-   # nonlocal a 
+   # nonlocal a
    # a += 1
     print(a)
-    count = 0 
+    count = 0
     def inc():
         nonlocal count
         count += 1
@@ -2071,7 +2032,7 @@ def foo(xyz=[],u='abc',z=123):
     xyz = xyz[:]
     xyz.append(1)
     print(xyz)
-    
+
 foo()
 print(1,foo.__defaults__)
 foo()
@@ -2086,7 +2047,7 @@ def foo(xyz=None,u='abc',z=123):
         xyz = []
     xyz.append(1)
     print(xyz)
-    
+
 foo()
 print(1,foo.__defaults__)
 foo()
@@ -2110,7 +2071,7 @@ def foo(xyz=[],u='abc',z=123):
     return xyz
 
 print(foo(),id(foo),foo.__defaults__)
-del foo								#删除
+del foo #删除
 print(foo(),id(foo),foo.__defaults__)
 #局部函数
 def foo(xyz=[],u='abc',z=123):
@@ -2118,14 +2079,14 @@ def foo(xyz=[],u='abc',z=123):
     def inner(a=10):
         pass
     print(inner)
-    def inner(a=100):	#覆盖
+    def inner(a=100):#覆盖
         print(xyz)
     print(inner)
-    return inner 
+    return inner
 
 bar = foo()
 print(id(foo),id(bar),foo.__defaults__,bar.__defaults__)
-del bar							#删除函数名称，函数应用计数减一				
+del bar #删除函数名称，函数应用计数减一
 print(id(foo),id(bar),foo.__defaults__,bar.__defaults__)
 ```
 
