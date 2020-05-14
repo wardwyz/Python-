@@ -1026,7 +1026,7 @@ In [12]: len(t) #返回元素个数
 #元组为只读对象，所以没有增改删选项
 ```
 
-##### 命名元组namedtuple
+#### 命名元组namedtuple
 
 ```python
 from collections import namedtuple
@@ -1859,53 +1859,55 @@ zip(*iterables) #拉链函数，把多个可迭代对象合并在一起，返回
 ### 函数定义
 
 ```python
-#默认参数
+#默认参数(缺省值)，可以不输入参数使用默认
 def add(x=4, y=5):
- return x+y
-#可变参数
+    return x+y
+#可变参数,可以接受多个参数，作为tuple的形式
 def add(*nums):
     sum = 0
     print(type(nums))
     for x in nums:
        sum += x
     print(sum)
-#关键字可变参数
+add(1,2,3,4,5)
+#关键字可变参数，可以接收多个关键字参数
 def showconfig(**kwargs):
     for k,v in kwargs.items():
     print('{} = {}'.format(k, v))
+showconfig(host='123',port='234')
 #混用
-def showconfig(username, *args, **kwargs)
-#keyword-only
-def fn(*args, x):
-def(**kwargs, x):
-def fn(*, x,y):
-#解构
-In [8]:  def add(x,y):
-   ...:     return x+y
-In [9]: add(*(4,5))
-Out[9]: 9
-In [10]: add(*[4,5])
-Out[10]: 9
-In [11]: add(*{4,9})
-Out[11]: 13
-
-In [12]: d = dict(x=5,y=6)
-In [13]: add(*d)
-Out[13]: 'yx'
-In [14]: add(**d)
-Out[14]: 11
+def showconfig(x, *args, **kwargs)
+参数列表参数一般顺序是，普通参数、缺省参数、可变位置参数、keyword-only参数（可带缺省值）、可变关键字参数
+#keyword-only,即必须通过关键字来传参
+def fn(*args, x): #x必须使用关键字传参
+def fn(*, x,y): #所有*后参数都用关键字传参
+def(**kwargs, x): #错误表达方式
+#参数结构
+非字典类型使用*解构成位置参数
+字典类型使用**解构成关键字参数
+def add(x,y):
+    return x+y
+print(add(*(4,5)))
+print(add(*{'a':4,'b':5}))
+print(add(**{'a':4,'b':5}))
 ```
 
+### 函数实验
+
+#### 接受至少两个参数，返回最小最大值
+
 ```python
-#接受至少两个参数，返回最小最大值
 import random
 def DoubleValues(*nums):
     print(nums)
     return max(nums),min(nums)
 
 print(*DoubleValues(*[random.randint(10,20) for _ in range(10)]))
+```
 
-#接受参数N，答应上三角，下三角
+#### 接受参数N，打印上三角，下三角
+
+```python
 #上三角
 def show(n):
     tail = ' '.join([str(i) for i in range(n,0,-1)])
@@ -1915,12 +1917,10 @@ def show(n):
     print(tail)
 
 show(12)
-
 #下三角
 def showtail(n):
     tail = ' '.join([str(i) for  i in range(n,0,-1)])
     print(tail)
-
     for i in range(len(tail)):
         if tail[i] == ' ':
             print(' '*i,tail[i+1:])
@@ -1928,8 +1928,9 @@ def showtail(n):
 showtail(12)
 ```
 
+#### 插入排序
+
 ```python
-#插入排序
 m_list = [
     [1,9,8,5,3,4,2,6,7],[1,2,3,4,5,6,7,8,9]
 ]
@@ -1948,28 +1949,29 @@ nums.pop(0)
 print(nums)
 ```
 
-#### 作用域、返回值
+### 返回值
+
+1. 没有return语句，隐式调用return None
+2. 一个函数可以存在多个return语句，但是只有一条可以被执行
+3. return语句之后的其他语句不会被执行
+4. 函数不能返回多个值
 
 ```python
-#返回值
-"""
-没有return语句，隐式调用return None
-一个函数可以存在多个return语句，但是只有一条可以被执行
-return语句之后的其他语句不会被执行
-函数不能返回多个值
-"""
 def fn(x):
     for i in range(x):
         if i > 3:
             return i
     else:
         print("{} is not greater than 3".format(x))
+```
 
-#函数嵌套
-"""
-一个函数中定义了另一个函数称为函数嵌套
-内部函数不能被外部直接使用
-"""
+### 函数嵌套
+
+1. 一个函数中定义了另一个函数称为函数嵌套
+2. 内部函数不能被外部直接使用
+
+```python
+
 ```
 
 作用域:一个标识符的可见范围
@@ -2090,7 +2092,7 @@ del bar #删除函数名称，函数应用计数减一
 print(id(foo),id(bar),foo.__defaults__,bar.__defaults__)
 ```
 
-#### 树
+### 树
 
 1. 树
 
@@ -2160,7 +2162,7 @@ print(id(foo),id(bar),foo.__defaults__,bar.__defaults__)
       5. 含有n个结点的二叉树深度至多为n,最小为math.ceil(log2(n+1))
       6. 具有n 个结点的完全二叉树深度为int(log2(n+1))
 
-#### 递归函数
+### 递归函数
 
 ```python
 def foo1(b,b1=3):
@@ -2313,7 +2315,7 @@ print(peach())
 
 ```
 
-#### 匿名函数
+### 匿名函数
 
 ```python
 print((lambda :0)())
@@ -2328,7 +2330,7 @@ print((lambda *args: {x+2 for x in args})(*range(5)))
 [x for x in (lambda *args: map(lambda x: (x+1,args), args))(*range(5))]
 ```
 
-#### 生成器
+### 生成器
 
 ```python
 #生成器
@@ -2447,7 +2449,7 @@ print(next(foo))
 print(next(foo))
 ```
 
-#### 实验
+### 实验
 
 ```python
 #字典扁平化
