@@ -1892,6 +1892,22 @@ print(add(*{'a':4,'b':5}))
 print(add(**{'a':4,'b':5}))
 ```
 
+#### 返回值
+
+1. 没有return语句，隐式调用return None
+2. 一个函数可以存在多个return语句，但是只有一条可以被执行
+3. return语句之后的其他语句不会被执行
+4. 函数不能返回多个值
+
+```python
+def fn(x):
+    for i in range(x):
+        if i > 3:
+            return i
+    else:
+        print("{} is not greater than 3".format(x))
+```
+
 ### 函数实验
 
 #### 接受至少两个参数，返回最小最大值
@@ -1949,50 +1965,60 @@ nums.pop(0)
 print(nums)
 ```
 
-### 返回值
-
-1. 没有return语句，隐式调用return None
-2. 一个函数可以存在多个return语句，但是只有一条可以被执行
-3. return语句之后的其他语句不会被执行
-4. 函数不能返回多个值
-
-```python
-def fn(x):
-    for i in range(x):
-        if i > 3:
-            return i
-    else:
-        print("{} is not greater than 3".format(x))
-```
-
 ### 函数嵌套
 
 1. 一个函数中定义了另一个函数称为函数嵌套
 2. 内部函数不能被外部直接使用
 
 ```python
-
+def outer():
+    def inner():
+        print('inner')
+    print('outer')
+    inner()
+outer()
+inner() #内部函数不可调用，会报错
 ```
 
-作用域:一个标识符的可见范围
+#### 作用域
 
-对比
-
-1. 作用域对比
-
-![image-20200419163832733](python%E7%AC%94%E8%AE%B0.assets/image-20200419163832733.png)
-
-![image-20200419163925861](python%E7%AC%94%E8%AE%B0.assets/image-20200419163925861.png)
-
-2.嵌套对比
-
-![image-20200419164526977](python%E7%AC%94%E8%AE%B0.assets/image-20200419164526977.png)
+一个标识符的可见范围，就是标识符的作用域
 
 ```python
-"""闭包
+#嵌套结构优先调用内部的函数
+#正确表达
+x = 5
+def foo():
+    print(x) #x调用全局
+
+foo()
+#函数报错
+x = 5
+def foo():
+    x += 1 #x调用局部
+    print(x)
+
+foo()
+```
+
+##### 全局变量
+
+```python
+x = 5
+def foo():
+    global x
+    x += 1
+    print(x)
+foo()
+```
+
+##### 闭包
+
 自由变量：未在本地作用域中定义的变量。
-闭包：内层函数引用到了外层函数的自由变量
-"""
+
+闭包：内层函数引用到了外层函数的自由变量，就形成了闭包
+
+```python
 def counter():
     c = [0]
     def inc():
@@ -2006,15 +2032,12 @@ c = 100
 print(foo())
 ```
 
+##### nonlocal
+
+将变量标记为不在本地作用域定义，而在上级作用于定义，但不能是全局作用域定义
+
 ```python
-"""
-nonlocal 将变量标记为不在本地作用域定义，而在上级作用于定义，不是全局作用于定义
-"""
-a = 50
 def counter():
-   # nonlocal a
-   # a += 1
-    print(a)
     count = 0
     def inc():
         nonlocal count
@@ -2023,27 +2046,70 @@ def counter():
     return inc
 
 foo = counter()
-foo()
-foo()
+print(foo())
+print(foo())
 ```
 
+##### 默认值作用域
+
+函数体内不改变默认值，xyz都是传入参数或者默认参数的副本，无法修改
+
 ```python
-"""默认作用域"""
-#函数体内不改变默认值，xyz都是传入参数或者默认参数的副本，无法修改
 def foo(xyz=[],u='abc',z=123):
     xyz = xyz[:]
     xyz.append(1)
     print(xyz)
 
 foo()
-print(1,foo.__defaults__)
+print(1,foo.__defaults__) #不会因为函数体中使用了而发生变化
 foo()
 print(2,foo.__defaults__)
 foo([19])
 print(3,foo.__defaults__)
-foo([10，5])
+foo([10，5]) #报错
 print(4,foo.__defaults__)
-#使用不可变类型默认值，如果使用缺省值就创建列表，如果传入列表就修改
+
+def foo(w,u='abc',*,z=123,zz=[456]):
+    u = 'xyz'
+    z = 789
+    zz.append(1)
+    print(w,u,z,zz)
+print(foo.__defaults__) #元组保留所有位置参数默认值
+foo('ward')
+print(foo.__kwdefaults__) #字典保留所有keyword-only参数默认值
+```
+
+使用对比
+
+函数体内，不改变默认值,通过影子拷贝，永远不能改变传入的参数
+
+```python
+def foo(xyz=[],u='abc',z=123):
+    xyz = xyz[:] #影子拷贝
+    xyz.append(1)
+    print(xyz)
+foo()
+print(foo.__defaults__)
+foo()
+print(foo.__defaults__)
+foo([10])
+print(foo.__defaults__)
+foo([10,5])
+print(foo.__defaults__)
+#输出
+[1]
+([], 'abc', 123)
+[1]
+([], 'abc', 123)
+[10, 1]
+([], 'abc', 123)
+[10, 5, 1]
+([], 'abc', 123)
+```
+
+使用不可变类型默认值，通过值得判断灵活选择创建或修改
+
+```python
 def foo(xyz=None,u='abc',z=123):
     if xyz is None:
         xyz = []
@@ -2056,18 +2122,29 @@ foo()
 print(2,foo.__defaults__)
 foo([19])
 print(3,foo.__defaults__)
-foo([10，5])
+foo([10,5])
 print(4,foo.__defaults__)
+#输出
+[1]
+1 (None, 'abc', 123)
+[1]
+2 (None, 'abc', 123)
+[19, 1]
+3 (None, 'abc', 123)
+[10, 5, 1]
+4 (None, 'abc', 123)
 ```
 
+### 函数销毁
+
+#### 全局函数
+
 ```python
-"""函数销毁"""
-#全局函数
 def foo(xyz=[],u='abc',z=123):
     xyz.append(1)
     return xyz
 
-print(foo(),id(foo),foo.__defaults__)#覆盖
+print(foo(),id(foo),foo.__defaults__) #覆盖
 def foo(xyz=[],u='abc',z=123):
     xyz.append(1)
     return xyz
@@ -2075,13 +2152,17 @@ def foo(xyz=[],u='abc',z=123):
 print(foo(),id(foo),foo.__defaults__)
 del foo #删除
 print(foo(),id(foo),foo.__defaults__)
-#局部函数
+```
+
+#### 局部函数
+
+```python
 def foo(xyz=[],u='abc',z=123):
     xyz.append(1)
     def inner(a=10):
         pass
     print(inner)
-    def inner(a=100):#覆盖
+    def inner(a=100):#上级作用域重新定义同名函数
         print(xyz)
     print(inner)
     return inner
@@ -2167,20 +2248,20 @@ print(id(foo),id(bar),foo.__defaults__,bar.__defaults__)
 ```python
 def foo1(b,b1=3):
     print('foo1',b,b1)
-    
+
 def foo2(c):
     foo3(c)
     print('foo2',c)
-    
+
 def foo3(d):
     print('foo3',d)
-    
+
 def main():
     print('main')
     foo1(100,101)
     foo2(200)
     print('main ending')
-    
+
 main()
 ```
 
@@ -2276,7 +2357,7 @@ print(revert(len(data)-1))
 def revert(n,lst=None):
     if lst is None:
         lst = []
-        
+
     x,y = divmod(n,10)
     lst.append(y)
     if x == 0:
@@ -2330,7 +2411,7 @@ print((lambda *args: {x+2 for x in args})(*range(5)))
 [x for x in (lambda *args: map(lambda x: (x+1,args), args))(*range(5))]
 ```
 
-### 生成器
+### 生成器的使用
 
 ```python
 #生成器
@@ -2347,7 +2428,7 @@ for m in x:
     print(m,'*')
 for m in x:
     print(m,'**')
-    
+
 #举例2
 y = (i for i in range(5))
 print(type(y))
@@ -2378,7 +2459,7 @@ def counter():
     i = 0
     while True:
         i += 1
-        yield i 
+        yield i
 
 def inc(c):
     return next(c)
@@ -2393,7 +2474,7 @@ def counter():
     i = 0
     while True:
         i += 1
-        yield i 
+        yield i
 
 def inc(c):
     c = counter()
@@ -2449,7 +2530,7 @@ print(next(foo))
 print(next(foo))
 ```
 
-### 实验
+### 函数相关实验
 
 ```python
 #字典扁平化
@@ -2515,18 +2596,18 @@ def base64(src):
             triple = src[offset:]
             r = 3 - len(triple)
             triple = triple + '\x00'*r
-            
+
         #print(triple,r)
         b = int.from_bytes(triple.encode(),'big')
         print(hex(b))
-        
+
         for i in range(18,-1,-6):
             if i == 18:
                 index = b >> i
             else:
                 index = b >> i & 0x3F
             ret.append(alphabet[index])
-            
+
         for i in range(1,r+1):
             ret[-i] = 0x3D
     return ret
@@ -2537,78 +2618,3 @@ print(base64(teststr))
 import base64
 print(base64.b64encode(teststr.encode()))
 ```
-
-```python
-#求2个字符串的最大公共子串
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
