@@ -1785,7 +1785,6 @@ import string
 #### 生成器
 
 ```python
-#生成器
 g = ('{:04}'.format(i) for i in range(1,11))
 next(g)
 for x in g:
@@ -2204,7 +2203,7 @@ print(id(foo),id(bar),foo.__defaults__,bar.__defaults__)
       19. 森林：m棵不想交的数的集合
           1. 对于子树而言，其子树的集合就是森林
    4. 树的特点
-      1. 唯一各根
+      1. 唯一的根
       2. 子树不想交
       3. 双亲比孩子结点层次小1
 
@@ -2213,29 +2212,24 @@ print(id(foo),id(bar),foo.__defaults__,bar.__defaults__)
    1. 每个结点最多两棵树
    2. 是有序树
    3. 五种基本形态
-
       1. 空二叉树
       2. 只有一个根结点
       3. 根结点只有左树
       4. 根结点只有右树
       5. 根结点只有左子树和右子树
    4. 斜树
-
       1. 左斜树
       2. 右斜树
    5. 满二叉树
-
       1. 所有分支结点都存在左子树和右子树，并且所有叶子结点只存在最下面一层
       2. 同样深度二叉树中，满二叉树结点最多
       3. K为深度，结点数为2^k-1
    6. 完全二叉树
-
       1. 二叉树的深度为K，二叉树的层次从1到K-1层的结点数都达到了最大个数，在第K层的所有结点都集中在最左边
       2. 完全二叉树由满二叉树引出
       3. 满二叉树一定是完全二叉树
       4. K为深度，结点总数最大值为2^k-1，当达到最大值时候就是满二叉树
    7. 二叉树性质
-
       1. 二叉树的第i层至多有2^(i-1)个结点
       2. 深度为k的二叉树，至多有2^k-1个结点
       3. 对任何一颗二叉树，其终端结点数为n0,度数为2的结点数为n2，n0=n2+1。即，叶子结点数-1等于度数为2的结点数。
@@ -2244,6 +2238,10 @@ print(id(foo),id(bar),foo.__defaults__,bar.__defaults__)
       6. 具有n 个结点的完全二叉树深度为int(log2(n+1))
 
 ### 递归函数
+
+#### 递归函数定义
+
+函数直接或者间接调用自身就是递归，递归一定有边界条件
 
 ```python
 def foo1(b,b1=3):
@@ -2265,54 +2263,51 @@ def main():
 main()
 ```
 
-```python
-#斐波拉契数列
-import datetime
-# Fib Seq
-start = datetime.datetime.now()
-pre = 0
-cur = 1 # No1
-print(pre, cur, end=' ')
-n = 35
-# loop
-for i in range(n-1):
-    pre, cur = cur, pre + cur
-    print(cur, end=' ')
-delta = (datetime.datetime.now() - start).total_seconds()
-print(delta)
+#### 递归函数实验
 
-# Fib Seq
-start = datetime.datetime.now()
+##### 斐波拉契数列
+
+F(0)=0;F(1)=1;F(n)=F(n-1)+F(n-2)
+
+###### for循环
+
+```python
 pre = 0
-cur = 1 # No1
-print(pre, cur, end=' ')
-# recursion
-def fib1(n, pre=0,cur=1):
-    pre, cur = cur, pre + cur
-    print(cur, end=' ')
+cur = 1
+print(pre,cur,end=' ')
+n = 4
+for i in range(n-1):
+    pre,cur = cur,pre + cur
+    print(cur,end=' ')
+```
+###### 递归函数
+
+```python
+def fib(n):
+    return 1 if n<2 else fib(n-1) + fib(n-2)
+
+print(0,end=' ')
+for i in range(5):
+    print(fib(i),end=' ')
+
+#改进
+pre = 0
+cur = 1
+print(pre,cur,end=' ')
+def fib(n,pre=0,cur=1): 
+    pre,cur = cur, pre+cur
+    print(cur,end=' ')
     if n == 2:
         return
-    fib1(n-1, pre, cur)
+    fib(n-1,pre,cur)
 
-fib1(n)
-delta = (datetime.datetime.now() - start
-         ).total_seconds()
-print(delta)
-
-start = datetime.datetime.now()
-def fib2(n):
-    if n < 2:
-        return 1
-    return fib2(n-1) + fib2(n-2)
-
-for i in range(n):
-    print(fib2(i), end=' ')
-delta = (datetime.datetime.now() - start).total_seconds()
-print(delta)
+fib(10)
 ```
+对比：递归函数更加简洁，但是容易出现死循环，能不用则不用
+
+##### 求N的阶层
 
 ```python
-#求N的阶层
 def fac(n):
     if n == 1 :
         return 1
@@ -2341,9 +2336,9 @@ print(fac(n))
 print(fac1(n))
 print(fac2(n))
 ```
+##### 将一个数列逆序排列
 
 ```python
-#将一个数列逆序排列
 #方法一
 data = str(input('>>>'))
 
@@ -2358,13 +2353,13 @@ def revert(n,lst=None):
     if lst is None:
         lst = []
 
-    x,y = divmod(n,10)
+    x,y = divmod(n,10) #(x//y,x%y)
     lst.append(y)
     if x == 0:
         return lst
     return revert(x,lst)
 
-revert(int(input('>>>')))
+print(revert(int(input('>>>'))))
 #方法三
 num = int(input('>>>'))
 
@@ -2376,6 +2371,7 @@ def revert(num,target=[]):
 
 print(revert(str(num)))
 ```
+##### 猴子吃桃问题
 
 ```python
 #猴子第一天摘下若干颗桃子，当即吃一半，有多吃了一个，第二天又将剩下的吃了一半，又吃一个，以后每天早上吃前一天剩下的一半零一个，到第十天早上吃时，只剩下一个桃子，求第一天共摘多少个桃子。
@@ -2393,7 +2389,6 @@ def peach(days=1):
     return (peach(days + 1)+1)*2
 
 print(peach())
-
 ```
 
 ### 匿名函数
@@ -2411,11 +2406,16 @@ print((lambda *args: {x+2 for x in args})(*range(5)))
 [x for x in (lambda *args: map(lambda x: (x+1,args), args))(*range(5))]
 ```
 
-### 生成器的使用
+### 生成器
+
+生成器generator：生成器对象，可以由生成器表达式得到，也可以使用yield关键字得到一个生成器，调用这个函数得到生成器对象
+
+生成器函数：函数体包含yield语句
+
+普通的函数调用fn(),函数会立即执行完毕，生成器函数可以使用next函数多次执行
 
 ```python
-#生成器
-#举例1
+#举例
 def inc():
     for i in range(5):
         yield i
@@ -2428,14 +2428,16 @@ for m in x:
     print(m,'*')
 for m in x:
     print(m,'**')
-
-#举例2
+#举例
 y = (i for i in range(5))
 print(type(y))
 print(next(y))
 print(next(y))
+```
+生成器函数中，使用多个yield语句，执行一次后会暂停执行，吧yield表达式的值返回
+，再次执行会执行到下一个yield语句，return语句依然可以终止函数运行，但return语句的返回值不能被获取，return会导致无法继续获取下一个值，抛出stoplteration异常，如果没有return，执行到结尾也会抛出stoplteration
 
-#举例3
+```python
 def gen():
     print('line 1')
     yield 1
