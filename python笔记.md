@@ -2434,7 +2434,7 @@ print(type(y))
 print(next(y))
 print(next(y))
 ```
-生成器函数中，使用多个yield语句，执行一次后会暂停执行，吧yield表达式的值返回
+生成器函数中，使用多个yield语句，执行一次后会暂停执行，把yield表达式的值返回
 ，再次执行会执行到下一个yield语句，return语句依然可以终止函数运行，但return语句的返回值不能被获取，return会导致无法继续获取下一个值，抛出stoplteration异常，如果没有return，执行到结尾也会抛出stoplteration
 
 ```python
