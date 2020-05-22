@@ -2414,8 +2414,9 @@ print((lambda *args: {x+2 for x in args})(*range(5)))
 
 普通的函数调用fn(),函数会立即执行完毕，生成器函数可以使用next函数多次执行
 
+#### 举例
+
 ```python
-#举例
 def inc():
     for i in range(5):
         yield i
@@ -2454,40 +2455,44 @@ print(next(g))
 print(next(g))
 print(next(g))  #取完
 print(next(g,'End'))
+```
 
-#无限循环
-#对比1
+#### 无限循环
+
+```python
 def counter():
     i = 0
     while True:
         i += 1
         yield i
-
 def inc(c):
     return next(c)
-
 c = counter()
 print(inc(c))
 print(inc(c))
+#输出
 1
 2
-#对比2
+
+#对比
 def counter():
     i = 0
     while True:
         i += 1
         yield i
-
 def inc(c):
     c = counter()
     return next(c)
-
-
 print(inc(c))
 print(inc(c))
+#输出
 1
 1
-#计数器
+```
+#### 计数器
+
+```python
+
 def inc():
    def counter():
        i=0
@@ -2500,7 +2505,10 @@ def inc():
 foo = inc()
 print(foo())
 print(foo())
-#处理递归问题
+```
+#### 处理递归问题
+
+```python
 def fib():
    x=0
    y=1
@@ -2515,27 +2523,23 @@ for _ in range(5):
 for _ in range(100):
    next(foo)
 print(next(foo))
-#yield from
+```
+#### yield from
+
+```python
 def inc():
     for x in range(1000):
         yield x
-foo = inc()
-print(next(foo))
-print(next(foo))
-print(next(foo))
 #等价于
 def inc():
-    yield from range(1000)
-foo = inc()
-print(next(foo))
-print(next(foo))
-print(next(foo))
+    yield from range(1000) #3.3之后
 ```
 
 ### 函数相关实验
 
+#### 字典扁平化
+
 ```python
-#字典扁平化
 #源字典{'a':{'b':1,'c':2},'d':{'e':3,'f':{'g':4}}}
 #目标字典{'a.c': 2, 'd.f.g': 4, 'a.b': 1, 'd.e': 3}
 source = {'a':{'b':1,'c':2},'d':{'e':3,'f':{'g':4}}}
@@ -2580,9 +2584,9 @@ def faltmap(src):
 
 print(flatamp(source))
 ```
+#### 字符串base64编码
 
 ```python
-#字符串base64编码
 alphabet = b'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 teststr = 'abcd'
 teststr = 'ManMa'
@@ -2608,7 +2612,7 @@ def base64(src):
                 index = b >> i
             else:
                 index = b >> i & 0x3F
-            ret.append(alphabet[index])
+            ret.append(alpha    bet[index])
 
         for i in range(1,r+1):
             ret[-i] = 0x3D
@@ -2620,3 +2624,13 @@ print(base64(teststr))
 import base64
 print(base64.b64encode(teststr.encode()))
 ```
+#### 求2个字符串的最长公共子串
+
+```python
+
+
+```
+## 高阶函数
+
+### 高阶函数定义
+
