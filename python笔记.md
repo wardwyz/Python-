@@ -2634,3 +2634,4 @@ print(base64.b64encode(teststr.encode()))
 
 ### 高阶函数定义
 
+![](图片/2020-05-23-18-32-05.png)

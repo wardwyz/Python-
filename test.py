@@ -10,3 +10,5 @@ print(foo1())
 foo2 = counter(10)
 print(foo2())
 print(foo1 == foo2)
+
+
