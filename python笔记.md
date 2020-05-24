@@ -2645,12 +2645,3 @@ print(base64.b64encode(teststr.encode()))
 
 ### 高阶函数定义
 
-```mermaid
-graph TD;
-A-->B;
-A-->C;
-B-->D;
-C-->D;
-```
-
-![](img/2020-05-24-10-53-04.png)
