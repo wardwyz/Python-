@@ -2269,7 +2269,7 @@ main()
 
 F(0)=0;F(1)=1;F(n)=F(n-1)+F(n-2)
 
-###### for循环
+###### 用for循环来实现
 
 ```python
 pre = 0
@@ -2280,7 +2280,8 @@ for i in range(n-1):
     pre,cur = cur,pre + cur
     print(cur,end=' ')
 ```
-###### 递归函数
+
+###### 用递归函数来实现
 
 ```python
 def fib(n):
@@ -2294,7 +2295,7 @@ for i in range(5):
 pre = 0
 cur = 1
 print(pre,cur,end=' ')
-def fib(n,pre=0,cur=1): 
+def fib(n,pre=0,cur=1):
     pre,cur = cur, pre+cur
     print(cur,end=' ')
     if n == 2:
@@ -2303,6 +2304,7 @@ def fib(n,pre=0,cur=1):
 
 fib(10)
 ```
+
 对比：递归函数更加简洁，但是容易出现死循环，能不用则不用
 
 ##### 求N的阶层
@@ -2336,6 +2338,7 @@ print(fac(n))
 print(fac1(n))
 print(fac2(n))
 ```
+
 ##### 将一个数列逆序排列
 
 ```python
@@ -2371,6 +2374,7 @@ def revert(num,target=[]):
 
 print(revert(str(num)))
 ```
+
 ##### 猴子吃桃问题
 
 ```python
@@ -2406,7 +2410,7 @@ print((lambda *args: {x+2 for x in args})(*range(5)))
 [x for x in (lambda *args: map(lambda x: (x+1,args), args))(*range(5))]
 ```
 
-### 生成器
+### 生成器函数
 
 生成器generator：生成器对象，可以由生成器表达式得到，也可以使用yield关键字得到一个生成器，调用这个函数得到生成器对象
 
@@ -2435,6 +2439,7 @@ print(type(y))
 print(next(y))
 print(next(y))
 ```
+
 生成器函数中，使用多个yield语句，执行一次后会暂停执行，把yield表达式的值返回
 ，再次执行会执行到下一个yield语句，return语句依然可以终止函数运行，但return语句的返回值不能被获取，return会导致无法继续获取下一个值，抛出stoplteration异常，如果没有return，执行到结尾也会抛出stoplteration
 
@@ -2489,6 +2494,7 @@ print(inc(c))
 1
 1
 ```
+
 #### 计数器
 
 ```python
@@ -2506,6 +2512,7 @@ foo = inc()
 print(foo())
 print(foo())
 ```
+
 #### 处理递归问题
 
 ```python
@@ -2524,6 +2531,7 @@ for _ in range(100):
    next(foo)
 print(next(foo))
 ```
+
 #### yield from
 
 ```python
@@ -2584,6 +2592,7 @@ def faltmap(src):
 
 print(flatamp(source))
 ```
+
 #### 字符串base64编码
 
 ```python
@@ -2624,13 +2633,24 @@ print(base64(teststr))
 import base64
 print(base64.b64encode(teststr.encode()))
 ```
+
 #### 求2个字符串的最长公共子串
 
 ```python
 
 
 ```
+
 ## 高阶函数
 
 ### 高阶函数定义
 
+```mermaid
+graph TD;
+A-->B;
+A-->C;
+B-->D;
+C-->D;
+```
+
+![](img/2020-05-24-10-53-04.png)
