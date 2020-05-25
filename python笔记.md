@@ -2644,4 +2644,3 @@ print(base64.b64encode(teststr.encode()))
 ## 高阶函数
 
 ### 高阶函数定义
-
