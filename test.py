@@ -1,18 +1,30 @@
-s1 ='abcdefg'
-s2 ='defabcdoabcdeftw'
-s3 = '1234a'
+# 打印树
 
-def findit(str1,str2):
-    count = 0
-    length = len(str1)
+# 居中对齐方案
+import math
 
-    for sublen in range(length,0,-1):
-        for start in range(0,length-sublen +1):
-            substr = str1[start:start + sublen]
-            count += 1
-            if str2.find(substr) > -1:
-                print('count={},substrlen={}'.format(count,sublen))
-                return substr
+def print_tree(array,unit_width=2):
+    length = len(array)
+    depth = math.ceil(math.log2(length+1))
 
-print(findit(s1,s2))
-print(findit(s1,s3))
+    index = 0
+
+    width = 2 ** depth - 1
+    for i in range(depth):
+        for j in range(2**i):
+            print('{:^{}}'.format(array[index],width*unit_width),end=' ' * unit_width)
+            index += 1
+            if index >= length:
+                break
+
+        width = width // 2
+        print()
+
+print_tree([x + 1 for x in range(29)])
+
+# 投影栅格方案
+
+import math
+
+def print_tree(array):
+    
