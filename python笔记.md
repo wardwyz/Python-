@@ -2621,14 +2621,13 @@ def base64(src):
                 index = b >> i
             else:
                 index = b >> i & 0x3F
-            ret.append(alpha    bet[index])
+            ret.append(alphabet[index])
 
         for i in range(1,r+1):
             ret[-i] = 0x3D
     return ret
 
 print(base64(teststr))
-
 
 import base64
 print(base64.b64encode(teststr.encode()))
@@ -2637,8 +2636,61 @@ print(base64.b64encode(teststr.encode()))
 #### 求2个字符串的最长公共子串
 
 ```python
+s1 ='abcdefg'
+s2 ='defabcd'
+s2 ='defabcdoabcdeftw'
+s3 = '1234a'
+s4 = '5678'
+s5 = 'abcdd'
 
+def findit(str1,str2):
+    matrix =[]
+    xmax = 0
+    xindex = 0
+    for i,x in enumerate(str2):
+        matrix.append([])
+        for j,y in enumerate(str1):
+            if x != y:
+                matrix[i].append(0)
+            else:
+                if i == 0 or j ==0:
+                    matrix[i].append(1)
+                else:
+                    matrix[i].append(matrix[i-1][j-1]+1)
 
+                if matrix[i][j] > xmax:
+                    xmax = matrix[i][j]
+                    xindex = j
+                    xindex += 1
+    return str1[xindex-xmax:xindex]
+
+print(findit(s1,s2))
+print(findit(s1,s3))
+print(findit(s1,s4))
+print(findit(s1,s5))
+s1 = 'abcdefg'
+s5 = '304abvdd'
+print(findit(s1,s5))
+
+#方案二
+s1 ='abcdefg'
+s2 ='defabcdoabcdeftw'
+s3 = '1234a'
+
+def findit(str1,str2):
+    count = 0
+    length = len(str1)
+
+    for sublen in range(length,0,-1):
+        for start in range(0,length-sublen +1):
+            substr = str1[start:start + sublen]
+            count += 1
+            if str2.find(substr) > -1:
+                print('count={},substrlen={}'.format(count,sublen))
+                return substr
+
+print(findit(s1,s2))
+print(findit(s1,s3))
 ```
 
 ## 高阶函数
