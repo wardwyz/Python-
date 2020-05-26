@@ -2314,8 +2314,76 @@ print(id(foo),id(bar),foo.__defaults__,bar.__defaults__)
      |---|---|---|---|---|---|---|---|---|---|
      ||80|70|50|60|10|40|20|30|90|
 
+#### 堆排序实验
 
+1. 打印树
+```python
+# 居中对齐方案
+import math
 
+def print_tree(array,unit_width=2):
+    length = len(array)
+    depth = math.ceil(math.log2(length+1))
+
+    index = 0
+
+    width = 2 ** depth - 1
+    for i in range(depth):
+        for j in range(2**i):
+            print('{:^{}}'.format(array[index],width*unit_width),end=' ' * unit_width)
+            index += 1
+            if index >= length:
+                break
+
+        width = width // 2
+        print()
+
+print_tree([x + 1 for x in range(29)])
+
+# 投影栅格方案
+import math
+
+def print_tree(array):
+    index = 1
+    depth = math.ceil(math.log2(len(array)))
+    sep = '  '
+    for i in range(depth):
+        offset = 2**i
+        print(sep * (2**(depth -i -1)-1),end='')
+        line = array[index:index+ offset]
+        for j,x in enumerate(line):
+            print('{:>{}}'.format(x,len(sep)),end='')
+            interval = 0 if i == 0 else 2**(depth-i)-1
+            if j <len(line)-1:
+                print(sep * interval,end='')
+
+        index += offset
+        print()
+
+print_tree([0,30,20,80,40,50,10,60,70,90,22])
+```
+2. 堆调整
+```python
+origin = [0,30,20,80,40,50,10,60,70,90]
+
+total = len(origin)-1
+print(origin)
+
+def heap_adjust(n,i,array:list):
+    while 2*i <= n:
+        lchile_index = 2*i
+        max_child_index = lchile_index
+        if n> lchile_index and array[lchile_index + 1] > array[lchile_index]:
+            max_child_index = lchile_index + 1
+        if array[max_child_index] > array[i]:
+            array[i],array[max_child_index] = array[max_child_index],array[i]
+            i = max_child_index
+        else:
+            break
+
+heap_adjust(total,total//2,origin)
+print(origin)
+```
 
 
 
