@@ -2174,6 +2174,8 @@ print(id(foo),id(bar),foo.__defaults__,bar.__defaults__)
 
 ### 树
 
+#### 树的定义
+
 1. 树
 
    1. 非线性结构，每个元素有多个前驱和后继
@@ -2701,6 +2703,28 @@ def inc():
 
 #### 字典扁平化
 
+```mermaid
+graph TD 
+    a --- b
+    a --- c
+    b --- 1
+    c --- 2
+    d --- e
+    d --- f 
+    e --- 3
+    f --- g 
+    g --- 4
+```
+转换为
+
+```mermaid 
+graph TD 
+    a.b --- 1
+    a.c --- 2
+    d.e --- 3
+    d.f.g --- 4
+```
+
 ```python
 #源字典{'a':{'b':1,'c':2},'d':{'e':3,'f':{'g':4}}}
 #目标字典{'a.c': 2, 'd.f.g': 4, 'a.b': 1, 'd.e': 3}
@@ -2732,27 +2756,41 @@ print(flatamp(source))
 #改造 不暴露给外部内部的字典
 source = {'a':{'b':1,'c':2},'d':{'e':3,'f':{'g':4}}}
 
-def faltmap(src):
-    def _flatamp(src,dest=None,prefix=''):
+def flatmap(src):
+    def _flatmap(src,dest=None,prefix=''):
         for k,v in src.items():
             key = prefix + k
             if isinstance(v,(list,tuple,set,dict)):
-                _flatamp(v,dest,key + '.')
+                _flatmap(v,dest,key + '.')
             else:
                 dest[key] = v
-        dest = {}
-        _flatamp(src,dest)
-        return dest
+    dest = {}
+    _flatmap(src,dest)
+    return dest
 
-print(flatamp(source))
+print(flatmap(source))
 ```
 
 #### 字符串base64编码
 
 ```python
+
+# 将输入每三个字节断开，拿出三个字节，没六个bit段开成4段
+# 2**6 =4 因此有了base64编码表
+# 每一段当成一个8bit看他的值，这个值就是base64编码表的索引值，找到对应字符
+# 再去3个字节，同样处理，看到最后
+
+# 例：
+# abc对应ASCII码：0x61 0x62 0x63
+# 01100001 01100010 01100011
+# 011000 010110 001001 100011
+#   24      22    9     35
+
+
 alphabet = b'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-teststr = 'abcd'
-teststr = 'ManMa'
+
+teststr = 'abc'
+# teststr = 'ManMa'
 
 def base64(src):
     ret = bytearray()
@@ -2760,31 +2798,32 @@ def base64(src):
     r = 0
     for offset in range(0,length,3):
         if offset + 3 <= length:
-            triple = src[offset:offset + 3 ]
+            triple = src[offset:offset + 3] #切片
         else:
             triple = src[offset:]
             r = 3 - len(triple)
-            triple = triple + '\x00'*r
+            triple = triple + '\x00'*r #补几个0
+        # print(triple,r)
 
-        #print(triple,r)
-        b = int.from_bytes(triple.encode(),'big')
-        print(hex(b))
+        # 将3个字节看成一个整体转换成字节bytes，大端模式
+        # abc => 0x616263
+        b = int.from_bytes(triple.encode(),'big') #小端模式为‘little’ encode生成二进制
+        print(hex(b)) #十六进制
 
+        # 01100001 01100010 01100011 ==> abc
+        # 011000 010110 001001 100011 六位断开
         for i in range(18,-1,-6):
             if i == 18:
-                index = b >> i
+                index = b >> i #右移
             else:
-                index = b >> i & 0x3F
-            ret.append(alphabet[index])
+                index = b >> i & 0x3F #0b0011 1111
+            ret.append(alphabet[index]) #得到base64编码列表
 
-        for i in range(1,r+1):
-            ret[-i] = 0x3D
+        for i in range(1,r+1): #1到r，补几个0替换成几个=
+            ret[-i] = 0x3D #等号的ASCII码
     return ret
 
 print(base64(teststr))
-
-import base64
-print(base64.b64encode(teststr.encode()))
 ```
 
 #### 求2个字符串的最长公共子串
