@@ -3002,7 +3002,7 @@ print(findit(s1,s2))
     - 接受一个或多个函数作为参数
     - 输出一个函数
 
-### 自建sort函数
+#### 自建sort函数
 1. 功能：sorted函数返回一个新列表，可设置升序降序，可设置一个排序函数
 2. 遍历原列表，和新列表的值依次比较决定如何插入到新列表中
 #### sort函数实现
@@ -3136,5 +3136,120 @@ def sort(iterable,key=None):
 
 print(sort(lst))
 ```
-### filter 过滤函数
+#### filter 过滤函数
+
+`print(list(filter(lambda x: x%3==0, [1,9,55,150,-3,78,28,123])))`
+
+#### map 元素映射
+
+```python
+list(map(lambda x:2*x+1, range(5)))
+dict(map(lambda x: (x%5,x) , range(500)))
+```
+### 柯里化
+将原来接受两个参数的函数转变成新的接受一个参数的函数的过程。新的函数返回一个以原有第二个参数为参数的函数。
+z=f(x,y) ==> z=f(x)(y)
+```python
+def add1(x,y):
+    return x+y
+
+def add(x):
+    def _add(y):
+        return x+y
+    return _add
+
+foo = add(4)
+print(add1(4,5))
+print(add(4)(5))
+print(foo(5))
+```
+### 装饰器
+
+耦合性太高
+```python
+def add(x,y,file):
+    print('call {},{}+{}'.format(add.__name__,x,y),file=file)
+    return x+y
+
+print(add(4,5))
+```
+业务提取
+```python
+def add(x,y):
+    return x+y
+
+def logger(fn):
+    print('begin')
+    x = fn(4,5)
+    print('end')
+    return x
+
+print(logger(add))
+```
+参数优化
+```python
+def add(x,y):
+    return x+y
+
+def logger(fn,*args,**kwarg):
+    print('begin')
+    ret = fn(*args,**kwarg)
+    print('end')
+    return ret
+
+print(logger(add,5,y=60))
+```
+柯里化
+```python
+def add(x,y):
+    return x+y
+
+def logger(fn):
+    def _logger(*args,**kwarg):
+        print('begin')
+        ret = fn(*args,**kwarg)
+        print('end')
+        return ret
+    return _logger
+
+foo = logger(add)
+print(foo(4,5))
+
+print(logger(add)(3,5))
+```
+优化
+```python
+def add(x,y):
+    return x+y
+
+def logger(fn):
+    def _logger(*args,**kwarg):
+        print('begin')
+        ret = fn(*args,**kwarg)
+        print('end')
+        return ret
+    return _logger
+
+foo = logger(add)
+print(foo(4,5))
+
+add = logger(add)
+add(4,5)
+```
+转化成装饰器
+```python
+def logger(fn):
+    def _logger(*args,**kwarg):
+        print('begin')
+        ret = fn(*args,**kwarg)
+        print('end')
+        return ret
+    return _logger
+
+@logger #等价于add = logger(add)
+def add(x,y):
+    return x+y
+
+print(add(4,5))
+```
 
