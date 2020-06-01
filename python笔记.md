@@ -2996,3 +2996,145 @@ print(findit(s1,s2))
 ## 高阶函数
 
 ### 高阶函数定义
+
+1. 数学概念：y=g(f(x))
+2. 高阶函数至少满足下面的一个条件：
+    - 接受一个或多个函数作为参数
+    - 输出一个函数
+
+### 自建sort函数
+1. 功能：sorted函数返回一个新列表，可设置升序降序，可设置一个排序函数
+2. 遍历原列表，和新列表的值依次比较决定如何插入到新列表中
+#### sort函数实现
+1. 基础函数
+```python
+lst = [1,2,3,4,5,3,1,5]
+def sort(iterable):
+    ret = []
+    for x in iterable:
+        for i,y in enumerate(ret):
+            if x > y:
+                ret.insert(i,x)
+                break
+        else:
+            ret.append(x)
+    return ret
+
+print(sort(lst))
+```
+2. flag加参
+```python
+lst = [1,2,3,4,5,3,1,5]
+def sort(iterable,reverse=False):
+    ret = []
+    for x in iterable:
+        for i,y in enumerate(ret):
+            flag = x > y if not reverse else x < y  
+            if flag:
+                ret.insert(i,x)
+                break
+        else:
+            ret.append(x)
+    return ret
+
+print(sort(lst,True))
+```
+3. 嵌套函数
+```python
+lst = [1,2,3,4,5,3,1,5]
+def sort(iterable,reverse=False):
+    def comp(a,b):
+        flag = a > b if not reverse else a < b  
+        return flag
+    ret = []
+    for x in iterable:
+        for i,y in enumerate(ret):
+            
+            if comp(x,y):
+                ret.insert(i,x)
+                break
+        else:
+            ret.append(x)
+    return ret
+
+print(sort(lst,True))
+```
+4. 函数提取
+```python
+lst = [1,2,3,4,5,3,1,5]
+def comp(a,b,reverse):
+    return a > b if reverse else a < b  
+
+def sort(iterable,reverse=False):
+
+    ret = []
+    for x in iterable:
+        for i,y in enumerate(ret):
+            
+            if comp(x,y,reverse):
+                ret.insert(i,x)
+                break
+        else:
+            ret.append(x)
+    return ret
+
+print(sort(lst,True))
+```
+5. 内部传参
+```python
+lst = [1,2,3,4,5,3,1,5]
+def comp(a,b):
+    return a > b 
+
+def sort(iterable,key=comp,reverse=False):
+    ret = []
+    for x in iterable:
+        for i,y in enumerate(ret):
+            flag = key(x,y) if reverse else key(y,x)
+            if flag:
+                ret.insert(i,x)
+                break
+        else:
+            ret.append(x)
+    return ret
+
+print(sort(lst))
+```
+6. 匿名函数转化
+```python
+lst = [1,2,3,4,5,3,1,5]
+
+def sort(iterable,key=lambda a,b: a<b):
+    ret = []
+    for x in iterable:
+        for i,y in enumerate(ret):
+            if key(x,y):
+                ret.insert(i,x)
+                break
+        else:
+            ret.append(x)
+    return ret
+
+print(sort(lst,lambda a,b: a>b))
+```
+7. 优化
+```python
+lst = [1,2,3,4,5,3,1,5]
+def sort(iterable,key=None):
+    ret = []
+    if key is None:
+        key = lambda a,b: a>b
+
+    for x in iterable:
+        for i,y in enumerate(ret):
+            if key(x,y):
+                ret.insert(i,x)
+                break
+        else:
+            ret.append(x)
+    return ret
+
+print(sort(lst))
+```
+### filter 过滤函数
+
