@@ -3165,6 +3165,8 @@ print(foo(5))
 ```
 ### 装饰器
 
+- 构造过程
+
 耦合性太高
 ```python
 def add(x,y,file):
@@ -3252,4 +3254,133 @@ def add(x,y):
 
 print(add(4,5))
 ```
+装饰器格式
+```python
+import datetime
+import time
 
+def logger(fn):
+    def wrap(*args,**kwargs):
+        #before
+        print('args={},kwargs'.format(args,kwargs))
+        start = datetime.datetime.now()
+        ret = fn(*args,**kwargs)
+        #after 
+        duration = datetime.datetime.now() - start
+        print('function {} took {}s'.format(fn.__name__,duration.total_seconds()))
+        return ret
+    return wrap
+
+@logger
+def add(x,y):
+    print('call add')
+    time.sleep(2)
+    return x+y
+print(add(4,7))
+```
+
+#### 文档字符串
+```python
+def add(x,y):
+    """this is a function of addition"""
+
+    a = x+y
+    return x+y
+
+print('name = {}\n doc={}'.format(add.__name__,add.__doc__))
+```
+在装饰器下的应用
+```python
+def copy_properties(src):
+    def _copy(dst):
+        dst.__name__ = src.__name__
+        dst.__doc__ = src.__doc__
+        dst.__qualname__ = src.__qualname__
+        return dst
+    return _copy
+  
+def logger(fn):
+    @copy_properties(fn)
+    def _logger(*args,**kwarg):
+        '''This is logger'''
+        print('begin')
+        ret = fn(*args,**kwarg)
+        print('end')
+        return ret
+    return _logger
+
+@logger #等价于add = logger(add)
+def add(x,y):
+    '''
+    This is a function
+
+    return int
+    '''
+    return x+y
+
+print(add.__name__,add.__doc__,add.__qualname__)
+```
+获取函数的执行时长，对时长超过法制的函数记录
+```python
+import datetime
+import time
+
+def copy_properties(src):
+    def _copy(dst):
+        dst.__name__ = src.__name__
+        dst.__doc__ = src.__doc__
+        dst.__qualname__ = src.__qualname__
+        return dst
+    return _copy
+
+def logger(duration):
+    def _logger(fn):
+        @copy_properties(fn) # wrapper = wrapper(fn)(wrapper)
+        def wrapper(*args,**kwargs):
+            start = datetime.datetime.now()
+            ret = fn(*args,**kwargs)
+            delta = (datetime.datetime.now() - start).total_seconds()
+            print('so slow') if delta > duration else print('so fast')
+            return ret
+        return wrapper
+    return _logger
+
+@logger(5) # add = logger(5)(add)
+def add(x,y):
+    time.sleep(3)
+    return x + y
+print(add(5, 6))
+```
+将记录的功能提取出来，这样就可以通过外部提供的函数来灵活的控制输出
+```python
+import datetime
+import time
+
+def copy_properties(src):
+    def _copy(dst):
+        dst.__name__ = src.__name__
+        dst.__doc__ = src.__doc__
+        dst.__qualname__ = src.__qualname__
+        return dst
+    return _copy
+
+def logger(duration, func=lambda name, duration: print('{} took {}s'.format(name, duration))):
+    def _logger(fn):
+        @copy_properties(fn) # wrapper = wrapper(fn)(wrapper)
+        def wrapper(*args,**kwargs):
+            start = datetime.datetime.now()
+            ret = fn(*args,**kwargs)
+            delta = (datetime.datetime.now() - start).total_seconds()
+            if delta > duration:
+                func(fn.__name__, duration)
+            return ret
+        return wrapper
+    return _logger
+
+@logger(5) # add = logger(5)(add)
+def add(x,y):
+    time.sleep(3)
+    return x + y
+print(add(5, 6))
+```
+### functools 模块
