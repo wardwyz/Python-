@@ -3384,3 +3384,155 @@ def add(x,y):
 print(add(5, 6))
 ```
 ### functools 模块
+```python
+import datetime, time, functools
+def logger(duration, func=lambda name, duration: print('{} took {}s'.format(name, duration))):
+    def _logger(fn):
+        def wrapper(*args,**kwargs):
+            start = datetime.datetime.now()
+            ret = fn(*args,**kwargs)
+            delta = (datetime.datetime.now() - start).total_seconds()
+            if delta > duration:
+                func(fn.__name__, duration)
+            return ret
+        return functools.update_wrapper(wrapper, fn)
+    return _logger
+@logger(5) # add = logger(5)(add)
+def add(x,y):
+    time.sleep(1)
+    return x + y
+print(add(5, 6), add.__name__, add.__wrapped__, add.__dict__, sep='\n')
+```
+推荐装饰器形式
+```python
+import datetime, time, functools
+def logger(duration, func=lambda name, duration: print('{} took {}s'.format(name, duration))):
+    def _logger(fn):
+        @functools.wraps(fn)
+        def wrapper(*args,**kwargs):
+            start = datetime.datetime.now()
+            ret = fn(*args,**kwargs)
+            delta = (datetime.datetime.now() - start).total_seconds()
+            if delta > duration:
+                func(fn.__name__, duration)
+            return ret
+        return wrapper
+    return _logger
+@logger(5) # add = logger(5)(add)
+def add(x,y):
+    time.sleep(1)
+    return x + y
+print(add(5, 6), add.__name__, add.__wrapped__, add.__dict__, sep='\n')
+```
+### 类型注解
+
+```python
+def add(x:int,y:int)->int:
+    '''
+    x:int
+    y:int
+    return:int
+    '''
+    return x+y
+
+print(help(add))
+print(add(4,5))
+print(add('wa','rd'))
+```
+#### inspet模块
+signature(callable)，获取签名（函数签名包含了一个函数的信息，包括函数名、它的参数类型、它所在的类和名称空间及其他信息）
+```python
+import inspect
+def add(x:int, y:int, *args,**kwargs) -> int:
+    return x + y
+sig = inspect.signature(add)
+print(sig, type(sig)) # 函数签名
+print('params : ', sig.parameters) # 字典
+print('return : ', sig.return_annotation) #取注解
+print(sig.parameters['y'], type(sig.parameters['y']))
+print(sig.parameters['x'].annotation)
+print(sig.parameters['args'])
+print(sig.parameters['args'].annotation)
+print(sig.parameters['kwargs'])
+print(sig.parameters['kwargs'].annotation)
+```
+- Parameter对象
+    - 保存在元组中，是只读的
+    - name，参数的名字
+    - annotation，参数的注解，可能没有定义
+    - default，参数的缺省值，可能没有定义
+    - empty，特殊的类，用来标记default属性或者注释annotation属性的空值
+    - kind，实参如何绑定到形参，就是形参的类型
+        - POSITIONAL_ONLY，值必须是位置参数提供
+        - POSITIONAL_OR_KEYWORD，值可以作为关键字或者位置参数提供
+        - VAR_POSITIONAL，可变位置参数，对应*args
+        - KEYWORD_ONLY，keyword-only参数，对应*或者*args之后的出现的非可变关键字参数
+        - VAR_KEYWORD，可变关键字参数，对应**kwargs
+- inspect.isfunction(add)，是否是函数
+- inspect.ismethod(add))，是否是类的方法
+- inspect.isgenerator(add))，是否是生成器对象
+- inspect.isgeneratorfunction(add))，是否是生成器函数
+- inspect.isclass(add))，是否是类
+- inspect.ismodule(inspect))，是否是模块
+- inspect.isbuiltin(print))，是否是内建对象
+##### 举例
+```python
+import inspect
+
+def add(x, y:int=7, *args, z, t=10,**kwargs) -> int:
+    return x + y
+sig = inspect.signature(add)
+print(sig)
+print('params : ', sig.parameters) # 有序字典
+print('return : ', sig.return_annotation)
+print('~~~~~~~~~~~~~~~~')
+for i, item in enumerate(sig.parameters.items()):
+    name, param = item
+    print(i+1, name, param.annotation, param.kind, param.default)
+    print(param.default is param.empty, end='\n\n')
+```
+##### 应用
+
+```python
+import inspect
+def add(x, y:int=7) -> int:
+    return x + y
+def check(fn):
+    def wrapper(*args, **kwargs):
+        sig = inspect.signature(fn)
+        params = sig.parameters
+        values = list(params.values())
+        for i,p in enumerate(args):
+            if isinstance(p, values[i].annotation): # 实参和形参声明一致
+                print('==')
+        for k,v in kwargs.items():
+            if isinstance(v, params[k].annotation): # 实参和形参声明一致
+                print('===')
+        return fn(*args, **kwargs)
+    return wrapper
+
+print(check(add)(20,10))
+```
+装饰器形式
+```python
+import inspect
+def check(fn):
+    def wrapper(*args, **kwargs):
+        sig = inspect.signature(fn)
+        params = sig.parameters
+        values = list(params.values())
+        for i,p in enumerate(args):
+            param = values[i]
+            if param.annotation is not param.empty and not isinstance(p, param.annotation):
+                print(p,'!==',values[i].annotation)
+        for k,v in kwargs.items():
+            if params[k].annotation is not inspect._empty and not isinstance(v, params[k].annotation):
+                print(k,v,'!===',params[k].annotation)
+        return fn(*args, **kwargs)
+    return wrapper
+@check
+def add(x, y:int=7) -> int:
+    return x + y
+
+print(add(20,10))
+```
