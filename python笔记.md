@@ -3383,47 +3383,7 @@ def add(x,y):
     return x + y
 print(add(5, 6))
 ```
-### functools 模块
-```python
-import datetime, time, functools
-def logger(duration, func=lambda name, duration: print('{} took {}s'.format(name, duration))):
-    def _logger(fn):
-        def wrapper(*args,**kwargs):
-            start = datetime.datetime.now()
-            ret = fn(*args,**kwargs)
-            delta = (datetime.datetime.now() - start).total_seconds()
-            if delta > duration:
-                func(fn.__name__, duration)
-            return ret
-        return functools.update_wrapper(wrapper, fn)
-    return _logger
-@logger(5) # add = logger(5)(add)
-def add(x,y):
-    time.sleep(1)
-    return x + y
-print(add(5, 6), add.__name__, add.__wrapped__, add.__dict__, sep='\n')
-```
-推荐装饰器形式
-```python
-import datetime, time, functools
-def logger(duration, func=lambda name, duration: print('{} took {}s'.format(name, duration))):
-    def _logger(fn):
-        @functools.wraps(fn)
-        def wrapper(*args,**kwargs):
-            start = datetime.datetime.now()
-            ret = fn(*args,**kwargs)
-            delta = (datetime.datetime.now() - start).total_seconds()
-            if delta > duration:
-                func(fn.__name__, duration)
-            return ret
-        return wrapper
-    return _logger
-@logger(5) # add = logger(5)(add)
-def add(x,y):
-    time.sleep(1)
-    return x + y
-print(add(5, 6), add.__name__, add.__wrapped__, add.__dict__, sep='\n')
-```
+
 ### 类型注解
 
 ```python
@@ -3439,7 +3399,7 @@ print(help(add))
 print(add(4,5))
 print(add('wa','rd'))
 ```
-#### inspet模块
+### inspet模块
 signature(callable)，获取签名（函数签名包含了一个函数的信息，包括函数名、它的参数类型、它所在的类和名称空间及其他信息）
 ```python
 import inspect
@@ -3536,3 +3496,142 @@ def add(x, y:int=7) -> int:
 
 print(add(20,10))
 ```
+### functools 模块
+```python
+import datetime, time, functools
+def logger(duration, func=lambda name, duration: print('{} took {}s'.format(name, duration))):
+    def _logger(fn):
+        def wrapper(*args,**kwargs):
+            start = datetime.datetime.now()
+            ret = fn(*args,**kwargs)
+            delta = (datetime.datetime.now() - start).total_seconds()
+            if delta > duration:
+                func(fn.__name__, duration)
+            return ret
+        return functools.update_wrapper(wrapper, fn)
+    return _logger
+@logger(5) # add = logger(5)(add)
+def add(x,y):
+    time.sleep(1)
+    return x + y
+print(add(5, 6), add.__name__, add.__wrapped__, add.__dict__, sep='\n')
+```
+推荐装饰器形式
+```python
+import datetime, time, functools
+def logger(duration, func=lambda name, duration: print('{} took {}s'.format(name, duration))):
+    def _logger(fn):
+        @functools.wraps(fn)
+        def wrapper(*args,**kwargs):
+            start = datetime.datetime.now()
+            ret = fn(*args,**kwargs)
+            delta = (datetime.datetime.now() - start).total_seconds()
+            if delta > duration:
+                func(fn.__name__, duration)
+            return ret
+        return wrapper
+    return _logger
+@logger(5) # add = logger(5)(add)
+def add(x,y):
+    time.sleep(1)
+    return x + y
+print(add(5, 6), add.__name__, add.__wrapped__, add.__dict__, sep='\n')
+```
+1. partial方法
+偏函数，把函数部分的参数固定下来，相当于为部分的参数添加了一个固定的默认值，形成一
+个新的函数并返回
+从partial生成的新函数，是对原函数的封装
+```python
+import functools
+def add(x, y) -> int:
+    return x + y
+newadd = functools.partial(add, y=5)
+print(newadd(7))
+print(newadd(7, y=6))
+print(newadd(y=10, x=6))
+import inspect
+print(inspect.signature(newadd))
+```
+103
+
+
+
+
+## 文件IO
+
+### 常见IO操作
+
+column | column
+---|---
+open | 打开
+read | 读取
+write | 写入
+close | 关闭
+readline | 行读取
+readlines | 多行读取
+seek | 文件指针操作
+tell | 指针位置
+
+#### open
+'open(file,mode='r;, buffering=-1,encoding=None,errors,newline,closefd,opener)'
+1. file 
+打开或者要创建的文件名，不指定路径默认是当前路径
+- mode模式
+
+描述字符 | 意义
+--- | ---
+r | 缺省表示只读打开
+w | 只写打开
+x | 创建并写入一个新文件
+a | 写入打开，若存在追加
+b | 二进制模式
+t | 缺省的文本模式
++ | 读写打开一个文件。给原来只读、只写方式打开提供缺省的功能
+```python
+f = open('test') #只读
+f.read()
+f = open('test',w) #只写
+f.write('abc')
+```
+r是只读，wxa是只写
+w不管文件是否存在，都会生成全新的内容文件
+a不管文件是否存在，都会在打开文件的末尾追加
+x必须要求文件事先不存在，自己创造一个新文件
+t是字符流，将文件的字节按照某种字符编码理解，按照字符操作，默认模式
+b是字节流，将文件按照字节理解，与字符编码无关。
++为rwax提供缺失的功能，三四获取对象依旧按照rwax自己的特征。
+2. 文件指针
+mode=r，指针其实0
+mode=a，指针起始在EOF
+tell()显示当前指针位置
+seek(offset，whence)移动指针位置，offset偏移多少字节，whence从哪里开始
+    文本模式下
+        whence 0 缺省 从头开始 offset只能正整数
+        whence 1 从当前位置 offset只接受0
+        whence 2 从EOF开始 offset只接受0
+    二进制模式下
+        whence 0 缺省值 表示从头开始，offset只能是正数
+        whence 1 表示当前位置开始，offset可以正负
+        whence 2 表示EOF开始，offset可以正负
+3. buffering缓冲区
+-1表示使用缺省大小的buffer，如果二进制模式，是使用io.DEFAULT_BUFFER_SIZE值，模式是4096或者8192，如果文本模式，如果是终端设备，是行缓存方式，如果不是，是使用二进制的策略
+    - 0 只在二进制模式下使用，表示关buffer
+    - 1 只在文本模式下使用，表示使用行缓冲是。意思是见到换行符就flush
+    - 大于1 用指定的buffer大小
+buffer缓冲区是一个内存空间，一般来说是一个FIFO队列，到缓冲区满了或者达到阈值，数据才会flush到磁盘
+flush()将缓冲区数据写入磁盘
+close()关闭前调用flush()
+io.DEFAULT_BUFFER_SIZE缺省缓冲区大小，字节
+
+buffering | 说明
+--- |---
+buffering=-1 | t和b，都是io.DEFAULT_BUFFER_SIZE
+buffering=0 | b关闭缓冲区，t不支持
+buffering=1 | b就1个字节 t行缓冲，遇到换行符才flush
+buffering>1 | b模式表示行缓冲大小，缓冲区的值可以超过io.DEFAULT_BUFFER_SIZE，直到设定的值超出后才把缓冲区flush t模式是io.DEFAULT_BUFFER_SIZE，flush完后把当前字符串写入磁盘
+
+    1. 文本模式一般都用默认缓冲区带下
+    2. 二进制模式是一个一个字节的操作，可以指定buffer大小
+    3. 一般来说，默认缓冲区大小是比较好的选择，除非明确要求调整
+    4. 一般编程中，明确知道需要写入磁盘，都会手动flush，而不是自动或者等close
+4. encoding 编码，仅文本模式使用
