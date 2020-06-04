@@ -3575,6 +3575,7 @@ tell | 指针位置
 #### open
 'open(file,mode='r;, buffering=-1,encoding=None,errors,newline,closefd,opener)'
 1. file 
+
 打开或者要创建的文件名，不指定路径默认是当前路径
 - mode模式
 
@@ -3600,24 +3601,28 @@ x必须要求文件事先不存在，自己创造一个新文件
 t是字符流，将文件的字节按照某种字符编码理解，按照字符操作，默认模式
 b是字节流，将文件按照字节理解，与字符编码无关。
 +为rwax提供缺失的功能，三四获取对象依旧按照rwax自己的特征。
+
 2. 文件指针
+
 mode=r，指针其实0
 mode=a，指针起始在EOF
 tell()显示当前指针位置
 seek(offset，whence)移动指针位置，offset偏移多少字节，whence从哪里开始
-    文本模式下
+- 文本模式下
         whence 0 缺省 从头开始 offset只能正整数
         whence 1 从当前位置 offset只接受0
         whence 2 从EOF开始 offset只接受0
-    二进制模式下
+- 二进制模式下
         whence 0 缺省值 表示从头开始，offset只能是正数
         whence 1 表示当前位置开始，offset可以正负
         whence 2 表示EOF开始，offset可以正负
 3. buffering缓冲区
+
 -1表示使用缺省大小的buffer，如果二进制模式，是使用io.DEFAULT_BUFFER_SIZE值，模式是4096或者8192，如果文本模式，如果是终端设备，是行缓存方式，如果不是，是使用二进制的策略
-    - 0 只在二进制模式下使用，表示关buffer
-    - 1 只在文本模式下使用，表示使用行缓冲是。意思是见到换行符就flush
-    - 大于1 用指定的buffer大小
+- 0 只在二进制模式下使用，表示关buffer
+- 1 只在文本模式下使用，表示使用行缓冲是。意思是见到换行符就flush
+- 大于1 用指定的buffer大小
+
 buffer缓冲区是一个内存空间，一般来说是一个FIFO队列，到缓冲区满了或者达到阈值，数据才会flush到磁盘
 flush()将缓冲区数据写入磁盘
 close()关闭前调用flush()
