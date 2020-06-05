@@ -3573,7 +3573,10 @@ seek | 文件指针操作
 tell | 指针位置
 
 #### open
-'open(file,mode='r;, buffering=-1,encoding=None,errors,newline,closefd,opener)'
+```python
+open(file,mode='r;, buffering=-1,encoding=None,errors=None,newline=None,closefd=True,opener=None)
+```
+
 1. file 
 
 打开或者要创建的文件名，不指定路径默认是当前路径
@@ -3616,6 +3619,7 @@ seek(offset，whence)移动指针位置，offset偏移多少字节，whence从�
         whence 0 缺省值 表示从头开始，offset只能是正数
         whence 1 表示当前位置开始，offset可以正负
         whence 2 表示EOF开始，offset可以正负
+
 3. buffering缓冲区
 
 -1表示使用缺省大小的buffer，如果二进制模式，是使用io.DEFAULT_BUFFER_SIZE值，模式是4096或者8192，如果文本模式，如果是终端设备，是行缓存方式，如果不是，是使用二进制的策略
@@ -3639,4 +3643,103 @@ buffering>1 | b模式表示行缓冲大小，缓冲区的值可以超过io.DEFAU
     2. 二进制模式是一个一个字节的操作，可以指定buffer大小
     3. 一般来说，默认缓冲区大小是比较好的选择，除非明确要求调整
     4. 一般编程中，明确知道需要写入磁盘，都会手动flush，而不是自动或者等close
+
 4. encoding 编码，仅文本模式使用
+
+None表示使用缺省编码，依赖操作系统，Windows下缺省GBK，Linux下缺省UTF-8
+
+5. 其他参数
+- error：什么样的编码错误将被捕捉
+    - None和strict表示错误编码抛valueerror
+    - ignore 忽略
+- newline：文本模式中换行的转换，可以为None,'','\r','\n','\r\n'
+    - 读时，None表示'\r','\n','\r\n'都会转换成'\n';''表示不会自动转换通用换行符;其他合法字符表示换行符就是指定字符，会按照指定字符分行
+    - 写时，None表示'\n'都会被替换成为系统缺省行分隔符os.linesep;'\n'或''表示'\n'不替换;其他合法字符表示'\n'会被替换为指定字符
+- closefd:关闭文件描述符，True表示关闭，False会在文件关闭后保持这个描述符，用file.fileno() 查看
+
+#### read
+
+read(size=-1)
+size表示读取的多少个字符或者字节，负数或者None表示读取到EOF
+
+readline(size=-1)
+一行行读取文件内容。size设置一次能读取行内几个字符或者字节
+
+readline(hint=-1)
+读取所有行的列表。指定hint则返回指定行数
+
+#### write
+
+write(s)
+把字符串s写入到文件并返回字符的个数
+
+writelines(lines)
+将字符串列表写入文件
+
+#### close
+
+flush并关闭文件对象
+文件已关闭，再次关闭没有任何效果
+
+#### 其他
+
+seekable()是否可seek
+readable()是否可读
+writable()是否可写
+closed是否已关闭
+
+#### 上下文管理
+
+open files打开文件的上限是1024
+
+解决方案
+
+1. 异常处理
+当出现异常的时候，拦截异常。
+但是，因为很多代码都会出现OSError,不好判断就是因为资源异常限制产生
+
+2. 上下文管理
+一种特殊的语法交给解释器去释放文件对象
+
+```python
+with open('test') as f:
+    f.read()
+
+#另一种写法
+f = open('test')
+with f:
+    f.read()
+```
+#### 实验
+
+1. 指定一个源文件，实现copy到目标目录
+2. 对文件进行单词统计，不区分大小写，并显示单词TOP10 
+
+```python
+def wordcount(file='E:\sample.txt'):
+    chars = '''~！@#￥%……&*（）_+{}[]|\\/"'=;:.-<>'''
+
+    with open(file,encoding='utf-8') as f:
+        word_count = {}
+        for line in f:
+            words = line.split()
+
+            for k,v in zip(words,(1,)*len(words)): #(1,)元组配二元组
+                k = k.strip(chars)#取符号
+                k = k.lower()#全部转小写
+                word_count[k] = word_count.get(k,0)+1 #若k不存在返回缺省值0，k存在返回对应的Value
+                
+    lst = sorted(word_count.items(),key=lambda x: x[1],reverse=True)
+    for i in range(10):
+        print(str(lst[i]).strip("'()").replace("'",""))
+
+    return lst
+
+wc = wordcount()
+# print(wc)
+print(len(wc))
+```
+优化
+```python
+
+```
