@@ -3741,5 +3741,230 @@ print(len(wc))
 ```
 优化
 ```python
+def wordcount(file='E:\sample.txt'):
+    chars = '''~！@#￥%……&*（）_+{}[]|\\/"'=;:.<>,_'''
+    charset = set(chars)
+    with open(file,encoding='utf-8') as f:
+        word_count = {}
+        for line in f:
+            words = line.split()
 
+            for k,v in zip(words,(1,)*len(words)): #(1,)元组配二元组
+                k = k.strip(chars)
+                if len(k) < 1:
+                    continue
+                k = k.lower()
+                start = 0
+                for i,c in enumerate(k):
+                    if c in charset:
+                        if start == i:
+                            start = i + 1
+                            continue
+                        key = k[start:i]
+                        word_count[key] = word_count.get(key,0)+1 #若k不存在返回缺省值0，k存在返回对应的Value
+                        start = i + 1
+                else:
+                    key = k[start:]
+                    word_count[key] = word_count.get(key,0) + 1
+                print()
+    lst = sorted(word_count.items(),key=lambda x: x[1],reverse=True)
+    for i in range(10):
+        if i < len(lst):
+            print(str(lst[i]).strip("'()").replace("'",""))
+
+    return lst
+
+wc = wordcount()
+print(wc)
+print(len(wc))
 ```
+### stringIO/BytesIO
+
+#### stringIO
+
+```from io import StringIO```
+
+内存中，开辟的一个文本模式buffer，像文件一样使用它
+当close方法调用时候，buffer被释放
+
+```python
+from io import StringIO
+# 内存中构建
+sio = StringIO() # 像文件对象一样操作
+print(sio.readable(), sio.writable(), sio.seekable())
+sio.write("ward\nPython")
+sio.seek(0)
+print(sio.readline())
+print(sio.getvalue()) # 无视指针，输出全部内容
+sio.close()
+```
+
+- 优点：磁盘操作比内存操作慢的多，内存足够情况下，一般的优化思路就是少落地，减少磁盘IO，大大提高效率
+
+#### BytesIO
+
+```from io import BytesIO```
+
+内存中，开启的一个二进制模式的buffer，可以像文件一样的操作他
+当close方法调用时，buffer被释放
+
+```python
+from io import BytesIO # 内存中构建
+bio = BytesIO()
+print(bio.readable(), bio.writable(), bio.seekable())
+bio.write(b"ward\nPython")
+bio.seek(0)
+print(bio.readline())
+print(bio.getvalue()) # 无视指针，输出全部内容
+bio.close()
+```
+#### file-like对象
+
+类文件对象，可以像文件对象一样操作
+socket对象、输入输出对象（stdin,stdout)都是类文件对象
+
+```python
+from sys import stdout
+f = stdout
+print(type(f))
+f.write('ward')
+```
+
+### 路径操作
+
+#### 路径操作模块
+
+```from pathlib import Path``` 3.4之后版本
+
+- 初始化
+
+```python
+In [2]: from pathlib import Path
+In [3]: p = Path()
+In [4]: type(p)
+Out[4]: pathlib.WindowsPath
+```
+
+- 路径拼接和分解
+1. 操作符/
+    - path对象/path对象
+    - path对象/字符串 
+    - 字符串/path对象
+2. 分解
+    parts属性，返回路径中的每个部分
+3. joinpath(*other)连接多个字符串到path对象中
+
+```python
+In [18]: p = Path()
+In [19]: p = p / 'a'
+In [20]: p1 = 'b'/p
+In [21]: p1
+Out[21]: WindowsPath('b/a')
+In [22]: p2 = Path('c')
+In [23]: p3 = p2/p1
+In [24]: p3
+Out[24]: WindowsPath('c/b/a')
+In [25]: p3.joinpath('etc','init.d',Path('httpd'))
+Out[25]: WindowsPath('c/b/a/etc/init.d/httpd')
+In [26]: p3.parts
+Out[26]: ('c', 'b', 'a')
+```
+
+4. 获取路径
+- str 获取路径字符串
+- bytes 获取路径字符串的bytes
+
+```python
+In [28]: str(p3),bytes(p3)
+Out[28]: ('c\\b\\a', b'c\\b\\a')
+```
+
+5. 父目录
+- parent 目录的逻辑父目录
+- parents 父目录序列，索引0是直接的父
+
+```python
+In [29]: p = Path('/a/b/c/d')
+In [30]: p.parent.parent
+Out[30]: WindowsPath('/a/b')
+In [31]: for x in p.parents:
+    ...:     print(x)
+    ...:
+\a\b\c
+\a\b
+\a
+\
+```
+
+- name 目录的最后一个部分
+- suffix 目录中最后一个部分的扩展名
+- stem 目录中最后一个部分，没有后缀
+- suffixes 返回多个扩展名列表
+- with_suffix 补充扩展名到路径尾部，返回新的路径，扩展名存在则无效
+- with_name 替换目录最后一个部分并返回一个新的路径
+
+```python
+In [32]: p = Path('/ward/mysqlinstal.tar.gz')
+
+In [33]: p.name
+Out[33]: 'mysqlinstal.tar.gz'
+
+In [34]: p.suffix
+Out[34]: '.gz'
+
+In [35]: p.suffixes
+Out[35]: ['.tar', '.gz']
+
+In [36]: p.stem
+Out[36]: 'mysqlinstal.tar'
+
+In [37]: p.with_name('mysql-5.tgz')
+Out[37]: WindowsPath('/ward/mysql-5.tgz')
+
+In [38]: p = Path('README')
+
+In [39]: p.with_suffix('.txt')
+Out[39]: WindowsPath('README.txt')
+```
+
+- cwd() 返回当前工作目录
+- home() 返回当前家目录
+
+- is_dir() 是否是目录
+- is_file() 是否是普通文件
+- is_symlink() 是否是软连接
+- is_socket() 是否是socket文件
+- is_block_device() 是否是快设备
+- is_char_device() 是否是字符设备
+- is_absolute() 是否是觉得路径
+
+- resolve() 返回一个新的路径，这个路径是当前path的绝对路径，如果是软连接，字节解析
+- absolute() 也可以获取绝对路径，推荐resolve
+
+- exists() 目录或文件是否存在
+- rmdir() 删除空目录
+- touch(mode=0o666,exist_ok=True) 创建一个文件
+- as_url() 将路径返回层URL
+
+- mkdir(mode=0o777,parents=False,exist_ok=False)
+    - parents 是否创建父目录,True等同mkdir -p,False时，父目录不存在抛异常
+    - exist_ok false时，不存在抛异常，True忽略
+- iterdir() 迭代当前目录
+
+6. 通配符
+- glob(pattern) 通配给定的模式
+- rglob(pattern) 通配给定的模式，递归目录
+返回一个生成器
+
+7. 匹配
+- match(pattern) 模式匹配，成功返回True
+- stat() 相当于stat命令
+- lstat() 同stat() 但如果是符号链接，则显示符号链接本身的文件信息
+
+8. 文件操作
+- open(mode='r',buffering=-1,encoding=None,errors=None,newline=None)
+使用方法类似内建函数open，返回一个文件对象
+- read_bytes() 以'rb'读取路径对应文件，并返回二进制流
+- read_text(encoding=None,errors=None) 以'rt'方式读取路径对应文件，返回文本
+- Path.with_bytes(data) 以'wb'方式写入数据到路径对应文件
+- write_text(data,encoding=None,errors=None) 以'wt'方式写入字符串到路径对应文件
