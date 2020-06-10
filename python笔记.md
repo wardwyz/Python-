@@ -24,7 +24,12 @@ readline-devel zlib-devel bzip2-devel
 - python账户下安装pyenv
 
 ```shell
-curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenvinstaller | bash            获取脚本
+curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenvinstaller | bash   
+
+yum install readline readline-devel readline-static -y
+yum install openssl openssl-devel openssl-static -y
+yum install sqlite-devel -y
+yum install bzip2-devel bzip2-libs -y         
 ```
 
 ```shell
@@ -3832,13 +3837,66 @@ f.write('ward')
 
 ### 路径操作
 
-#### 路径操作模块
+#### OS模块
+
+```python
+In [6]: from os import path
+
+In [7]: p = path.join('/etc','sysconfig','network')
+
+In [8]: type(p),p
+Out[8]: (str, '/etc\\sysconfig\\network')
+
+In [9]: path.exists(p)
+Out[9]: False
+
+In [10]: path.split(p)
+Out[10]: ('/etc\\sysconfig', 'network')
+
+In [11]: path.abspath('.')
+Out[11]: 'C:\\Users\\28701\\OneDrive\\python'
+
+In [12]: p = path.join('o:/',p,'test.txt')
+
+In [13]: path.dirname(p)
+Out[13]: 'o:/etc\\sysconfig\\network'
+
+In [14]: path.basename(p)
+Out[14]: 'test.txt'
+
+In [15]: path.splitdrive(p)
+Out[15]: ('o:', '/etc\\sysconfig\\network\\test.txt')
+```
+```python
+p1 = path.abspath(__file__)
+print(p1,path.basename(p1))
+while p1 != path.dirname(p1):
+    p1 = path.dirname(p1)
+    print(p1,path.basename(p1))
+```
+
+操作系统平台
+
+属性或方法 | 结果
+--- | ---
+os.name() | window是nt,Linux是POSIX
+os.uname() | *nix 支持
+sys.platform | windows显示win32，Linux显示Linux
+
+os.listdir('o:/temp') 返回目录内容列表
+
+os.stat(path,*,dir_fd=None,follow_symlinks=True) 本质上调用Linux系统的stat
+os.chmod(path,*,dir_fd=None,follow_symlinks=True) 
+os.chown(path,uid,gid)
+
+
+#### path模块
 
 ```from pathlib import Path``` 3.4之后版本
 
 - 初始化
 
-```python
+ ```python
 In [2]: from pathlib import Path
 In [3]: p = Path()
 In [4]: type(p)
@@ -3884,6 +3942,7 @@ Out[28]: ('c\\b\\a', b'c\\b\\a')
 - parents 父目录序列，索引0是直接的父
 
 ```python
+
 In [29]: p = Path('/a/b/c/d')
 In [30]: p.parent.parent
 Out[30]: WindowsPath('/a/b')
@@ -3904,6 +3963,7 @@ In [31]: for x in p.parents:
 - with_name 替换目录最后一个部分并返回一个新的路径
 
 ```python
+
 In [32]: p = Path('/ward/mysqlinstal.tar.gz')
 
 In [33]: p.name
@@ -3925,6 +3985,7 @@ In [38]: p = Path('README')
 
 In [39]: p.with_suffix('.txt')
 Out[39]: WindowsPath('README.txt')
+
 ```
 
 - cwd() 返回当前工作目录
@@ -3951,13 +4012,33 @@ Out[39]: WindowsPath('README.txt')
     - exist_ok false时，不存在抛异常，True忽略
 - iterdir() 迭代当前目录
 
+```python
+#遍历，并判断文件类型，如果是目录是否可以判断其是否为空
+from pathlib import Path
+p = Path()
+p /= 'a'
+for x in p.parents[len(p.parents)-1].iterdir():
+    print(x,end='\t')
+    if x.is_dir():
+        Flag = False
+        for _ in x.iterdir():
+            Flag = True
+            break
+        print('dir','Not Empty' if Flag else 'Empty',sep='\t')
+    elif x.is_file():
+        print('file')
+    else:
+        print('other file')
+```
 6. 通配符
 - glob(pattern) 通配给定的模式
 - rglob(pattern) 通配给定的模式，递归目录
 返回一个生成器
 
+```list(Path().glob('test*')) ```
+
 7. 匹配
-- match(pattern) 模式匹配，成功返回True
+- match(pattern) 模式匹配，成功返回True **任意级
 - stat() 相当于stat命令
 - lstat() 同stat() 但如果是符号链接，则显示符号链接本身的文件信息
 
@@ -3968,3 +4049,29 @@ Out[39]: WindowsPath('README.txt')
 - read_text(encoding=None,errors=None) 以'rt'方式读取路径对应文件，返回文本
 - Path.with_bytes(data) 以'wb'方式写入数据到路径对应文件
 - write_text(data,encoding=None,errors=None) 以'wt'方式写入字符串到路径对应文件
+
+
+
+### shutil模块
+
+高级文件操作
+
+#### copy复制
+
+copyfileobj(fsrc,fdst[,length])
+文件对象复制，fsrc和fdst是open打开的文件对象，复制内容，fdst要求可写，length指定buffer大小
+
+copyfile(src,dst,*,follow_symlinks=True)
+复制文件内容，不含元数据。src,dst为文件的路径字符串
+
+copymode(src,dst,*,follow_symlinks=True)
+仅仅复制权限
+
+copystat(src,dst,*,follow_symlinks=True)
+复制元数据，stat包含权限
+
+copy(src,dst,*,follow_symlinks=True)
+复制文件内容、权限和部分元数据，不包含创建时间和修改时间
+
+copytree(src,dst,symlinks=Flase,ignore=None,copy_function=copy2)
+

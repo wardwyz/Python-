@@ -1,5 +1,7 @@
-from pathlib import Path
+import shutil
 
-p = Path()
-p = Path('a','b','c/d')
-p = Path('/etc')
+with open('E:/sample.txt','r+') as f1:
+    f1.write('abcd\n1234')
+    f1.flush()
+    with open('E:/copy.txt','w+') as f2:
+        shutil.copyfileobj(f1,f2)
