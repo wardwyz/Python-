@@ -3284,7 +3284,7 @@ def add(x,y):
 print(add(4,7))
 ```
 
-#### 文档字符串
+### 文档字符串
 ```python
 def add(x,y):
     """this is a function of addition"""
@@ -3391,6 +3391,10 @@ print(add(5, 6))
 
 ### 类型注解
 
+用于解决动态语言定义的弊端（不做任何类型检查，直到运行期问题才会显现；函数使用者不知道传入什么类型数据）
+
+#### 函数注解
+
 ```python
 def add(x:int,y:int)->int:
     '''
@@ -3402,24 +3406,67 @@ def add(x:int,y:int)->int:
 
 print(help(add))
 print(add(4,5))
-print(add('wa','rd'))
 ```
-### inspet模块
+- Python 3.5引入
+- 3.6引入变量注解 x:int=2
+- 对函数的参数进行类型注解
+- 对函数的返回值进行类型注解
+- 只对函数参数做一个辅助的说明，并不对函数参数进行类型检查
+- 提供给第三方工具，做代码分析，发现隐藏的bug
+- 函数注解的信息，保存在__annotations__属性中
+
+#### inspet模块
+
+提供获取对象信息的函数，可以检查函数和类、类型检查
+
 signature(callable)，获取签名（函数签名包含了一个函数的信息，包括函数名、它的参数类型、它所在的类和名称空间及其他信息）
+
 ```python
-import inspect
-def add(x:int, y:int, *args,**kwargs) -> int:
-    return x + y
-sig = inspect.signature(add)
-print(sig, type(sig)) # 函数签名
-print('params : ', sig.parameters) # 字典
-print('return : ', sig.return_annotation) #取注解
-print(sig.parameters['y'], type(sig.parameters['y']))
-print(sig.parameters['x'].annotation)
-print(sig.parameters['args'])
-print(sig.parameters['args'].annotation)
-print(sig.parameters['kwargs'])
-print(sig.parameters['kwargs'].annotation)
+In [1]: import inspect                                                                                                               
+
+In [2]: def add(x:int,y:int,*args,**kwargs) -> int: 
+   ...:     return x+y 
+   ...:                                                                                                                             
+
+In [3]: sig = inspect.signature(add)                                                                                                
+
+In [4]: sig #获取函数签名                                                                                                                        
+Out[4]: <Signature (x: int, y: int, *args, **kwargs) -> int>
+
+In [5]: type(sig) #签名类型                                                                                                                  
+Out[5]: inspect.Signature
+
+In [6]: sig.parameters #参数                                                                                                             
+Out[6]: 
+mappingproxy({'x': <Parameter "x: int">,
+              'y': <Parameter "y: int">,
+              'args': <Parameter "*args">,
+              'kwargs': <Parameter "**kwargs">})
+
+In [7]: sig.return_annotation #返回值类型                                                                                                       
+Out[7]: int
+
+In [8]: sig.parameters['y'] #参数类型                                                                                                       
+Out[8]: <Parameter "y: int">
+
+In [9]: type(sig.parameters['y'])                                                                                                   
+Out[9]: inspect.Parameter
+
+In [10]: sig.parameters['x'].annotation                                                                                             
+Out[10]: int
+
+In [11]: sig.parameters['args']                                                                                                     
+Out[11]: <Parameter "*args">
+
+In [12]: sig.parameters['args'].annotation                                                                                          
+Out[12]: inspect._empty
+
+In [13]: sig.parameters['kwargs']                                                                                                   
+Out[13]: <Parameter "**kwargs">
+
+In [14]: sig.parameters['kwargs'].annotation                                                                                        
+Out[14]: inspect._empty
+
 ```
 - Parameter对象
     - 保存在元组中，是只读的
@@ -3433,6 +3480,7 @@ print(sig.parameters['kwargs'].annotation)
         - VAR_POSITIONAL，可变位置参数，对应*args
         - KEYWORD_ONLY，keyword-only参数，对应*或者*args之后的出现的非可变关键字参数
         - VAR_KEYWORD，可变关键字参数，对应**kwargs
+
 - inspect.isfunction(add)，是否是函数
 - inspect.ismethod(add))，是否是类的方法
 - inspect.isgenerator(add))，是否是生成器对象
@@ -3440,126 +3488,207 @@ print(sig.parameters['kwargs'].annotation)
 - inspect.isclass(add))，是否是类
 - inspect.ismodule(inspect))，是否是模块
 - inspect.isbuiltin(print))，是否是内建对象
-##### 举例
+
 ```python
 import inspect
 
-def add(x, y:int=7, *args, z, t=10,**kwargs) -> int:
-    return x + y
+def add(x,y:int=7,*args,z,t=10,**kwargs)->int:
+    return x+y
 sig = inspect.signature(add)
-print(sig)
-print('params : ', sig.parameters) # 有序字典
-print('return : ', sig.return_annotation)
-print('~~~~~~~~~~~~~~~~')
-for i, item in enumerate(sig.parameters.items()):
-    name, param = item
-    print(i+1, name, param.annotation, param.kind, param.default)
-    print(param.default is param.empty, end='\n\n')
+for i,item in enumerate(sig.parameters.items()):
+    name,param = item
+    print(i+1,name,param.annotation,param.kind,param.default) #param.annotation参数注解,param.kind形参类型,param.default默认参数
+    print(param.default is param.empty,end='\n')
+
+1 x <class 'inspect._empty'> POSITIONAL_OR_KEYWORD <class 'inspect._empty'>
+True
+2 y <class 'int'> POSITIONAL_OR_KEYWORD 7
+False
+3 args <class 'inspect._empty'> VAR_POSITIONAL <class 'inspect._empty'>
+True
+4 z <class 'inspect._empty'> KEYWORD_ONLY <class 'inspect._empty'>
+True
+5 t <class 'inspect._empty'> KEYWORD_ONLY 10
+False
+6 kwargs <class 'inspect._empty'> VAR_KEYWORD <class 'inspect._empty'>
+True                                                                                                                            
 ```
+
 ##### 应用
 
+有如下函数，检查用户输入是否符合参数注解要求
+
+```python
+def add(x,y:int=7)->int:
+    return x+y
+```
+
 ```python
 import inspect
-def add(x, y:int=7) -> int:
-    return x + y
+
+def add(x,y:int=7)->int:
+    return x+y
+
 def check(fn):
-    def wrapper(*args, **kwargs):
+    def warpper(*args,**kwargs):
         sig = inspect.signature(fn)
-        params = sig.parameters
-        values = list(params.values())
+        params = sig.parameters #参数
+        values = list(params.values()) #取values
         for i,p in enumerate(args):
-            if isinstance(p, values[i].annotation): # 实参和形参声明一致
+            if isinstance(p,values[i].annotation):
                 print('==')
         for k,v in kwargs.items():
-            if isinstance(v, params[k].annotation): # 实参和形参声明一致
+            if isinstance(v,params[k].annotation):
                 print('===')
-        return fn(*args, **kwargs)
-    return wrapper
+        return fn(*args,**kwargs)
+    return warpper
 
 print(check(add)(20,10))
+print(check(add)(20,y=10))
+print(check(add)(y=10,x=20))
+
+==
+30
+===
+30
+===
+30
 ```
-装饰器形式
+
+装饰器形式改造
+
 ```python
 import inspect
-def check(fn):
-    def wrapper(*args, **kwargs):
-        sig = inspect.signature(fn)
-        params = sig.parameters
-        values = list(params.values())
-        for i,p in enumerate(args):
-            param = values[i]
-            if param.annotation is not param.empty and not isinstance(p, param.annotation):
-                print(p,'!==',values[i].annotation)
-        for k,v in kwargs.items():
-            if params[k].annotation is not inspect._empty and not isinstance(v, params[k].annotation):
-                print(k,v,'!===',params[k].annotation)
-        return fn(*args, **kwargs)
-    return wrapper
-@check
-def add(x, y:int=7) -> int:
-    return x + y
 
-print(add(20,10))
+def check(fn):
+    def warpper(*args,**kwargs):
+        sig = inspect.signature(fn)
+        params = sig.parameters #参数
+        values = list(params.values()) #
+        for i,p in enumerate(args):
+            if isinstance(p,values[i].annotation):
+                print('==')
+        for k,v in kwargs.items():
+            if isinstance(v,params[k].annotation):
+                print('===')
+        return fn(*args,**kwargs)
+    return warpper
+
+@check
+def add(x,y:int=7)->int:
+    return x+y
+
+add(20,10)
+add(20,y=10)
+add(y=10,x=20)
 ```
 ### functools 模块
-```python
-import datetime, time, functools
-def logger(duration, func=lambda name, duration: print('{} took {}s'.format(name, duration))):
-    def _logger(fn):
-        def wrapper(*args,**kwargs):
-            start = datetime.datetime.now()
-            ret = fn(*args,**kwargs)
-            delta = (datetime.datetime.now() - start).total_seconds()
-            if delta > duration:
-                func(fn.__name__, duration)
-            return ret
-        return functools.update_wrapper(wrapper, fn)
-    return _logger
-@logger(5) # add = logger(5)(add)
-def add(x,y):
-    time.sleep(1)
-    return x + y
-print(add(5, 6), add.__name__, add.__wrapped__, add.__dict__, sep='\n')
-```
-推荐装饰器形式
-```python
-import datetime, time, functools
-def logger(duration, func=lambda name, duration: print('{} took {}s'.format(name, duration))):
-    def _logger(fn):
-        @functools.wraps(fn)
-        def wrapper(*args,**kwargs):
-            start = datetime.datetime.now()
-            ret = fn(*args,**kwargs)
-            delta = (datetime.datetime.now() - start).total_seconds()
-            if delta > duration:
-                func(fn.__name__, duration)
-            return ret
-        return wrapper
-    return _logger
-@logger(5) # add = logger(5)(add)
-def add(x,y):
-    time.sleep(1)
-    return x + y
-print(add(5, 6), add.__name__, add.__wrapped__, add.__dict__, sep='\n')
-```
-1. partial方法
+
+1. partial,添加注解信息，本质是对函数包装，不改变原函数。
 偏函数，把函数部分的参数固定下来，相当于为部分的参数添加了一个固定的默认值，形成一
-个新的函数并返回
-从partial生成的新函数，是对原函数的封装
+个新的函数并返回，从partial生成的新函数，是对原函数的封装
 ```python
-import functools
-def add(x, y) -> int:
-    return x + y
-newadd = functools.partial(add, y=5)
-print(newadd(7))
-print(newadd(7, y=6))
-print(newadd(y=10, x=6))
-import inspect
-print(inspect.signature(newadd))
+In [26]: import functools                                                                                                           
+
+In [27]: def add(x,y)->int: 
+    ...:     return x+y 
+    ...:                                                                                                                            
+
+In [28]: newadd = functools.partial(add,y=5)                                                                                        
+
+In [29]: print(newadd(7))                                                                                                           
+12
+
+In [30]: print(newadd(7,y=6))                                                                                                       
+13
+
+In [31]: print(newadd(y=17,x=6))   
+23
+
+In [33]: inspect.signature(newadd)                                                                                                  
+Out[33]: <Signature (x, *, y=5) -> int>
+
 ```
-103
 
+```python
+In [34]: import functools                                                                                                           
 
+In [35]: def add(x,y,*args)->int: 
+    ...:     print(args) 
+    ...:     return x+y 
+    ...:                                                                                                                            
+
+In [36]: newadd = functools.partial(add,1,3,6,5)                                                                                    
+
+In [37]: newadd(7)                                                                                                                  
+(6, 5, 7)
+Out[37]: 4
+
+In [38]: newadd(7,10)                                                                                                               
+(6, 5, 7, 10)
+Out[38]: 4
+
+In [40]: newadd(9,10,y=20,x=26)                                                                                                     
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-40-cc1e9feb2d14> in <module>
+----> 1 newadd(9,10,y=20,x=26)
+
+TypeError: add() got multiple values for argument 'y'
+
+In [41]: newadd()                                                                                                                   
+(6, 5)
+Out[41]: 4
+
+In [42]: import inspect                                                                                                             
+
+In [43]: inspect.signature(newadd)                                                                                                  
+Out[43]: <Signature (*args) -> int>
+
+```
+2. @functools.lru_cache(maxsize=128, typed=False)
+
+Least-recently-used装饰器。lru，最近最少使用。cache缓存
+如果maxsize设置为None，则禁用LRU功能，并且缓存可以无限制增长。当maxsize是二的幂
+时，LRU功能执行得最好
+如果typed设置为True，则不同类型的函数参数将单独缓存。例如，f(3)和f(3.0)将被视为具有不
+同结果的不同调用
+
+```python
+In [44]: import functools                                                                                                           
+
+In [45]: import time                                                                                                                
+
+In [47]: @functools.lru_cache() 
+    ...: def add(x,y,z=3): 
+    ...:     time.sleep(z) 
+    ...:     return x+y 
+    ...:                                                                                                                            
+
+In [48]: add(4,5)                                                                                                                   
+Out[48]: 9
+
+In [49]: add(4.0,5)                                                                                                                 
+Out[49]: 9
+
+In [50]: add(4,6)                                                                                                                   
+Out[50]: 10
+
+In [51]: add(4,6,3)                                                                                                                 
+Out[51]: 10
+
+In [52]: add(6,4)                                                                                                                   
+Out[52]: 10
+
+In [53]: add(4,y=6)                                                                                                                 
+Out[53]: 10
+
+In [54]: add(x=4,y=6)                                                                                                               
+Out[54]: 10
+
+In [55]: add(y=6,x=4)                                                                                                               
+Out[55]: 10
+```
 
 
 ## 文件IO
@@ -4073,5 +4202,34 @@ copystat(src,dst,*,follow_symlinks=True)
 copy(src,dst,*,follow_symlinks=True)
 复制文件内容、权限和部分元数据，不包含创建时间和修改时间
 
-copytree(src,dst,symlinks=Flase,ignore=None,copy_function=copy2)
+copy2 比copy多了复制全部元数据，但需要平台支持
 
+copytree(src,dst,symlinks=Flase,ignore=None,copy_function=copy2,ignore_dangling_symlinks=False)递归复制目录
+
+#### rm删除
+
+shutil.rmtree(path,ignore_error=False,onerror=Nore)
+递归删除
+
+#### move移动
+
+move(src,dst,copy_function=copy2)
+递归移动文件
+
+### CSV文件
+
+Comma-Swparated Values
+CSV是一个被行分隔符、列分隔符划分成行和列的文本文件
+CSV不指定字符编码
+
+行分隔符为\r\n，最后一行可以没有换行符，列分隔符为逗号或制表符。每一行高成为一条记录record
+
+字段可以使用双引号括起来，也可以不适用。如果字段中出现双引号、逗号、换行符必须使用双引号，如果字段的值是双引号，使用两个双引号表示一个转义
+
+表头可选，和字段列对齐就行
+
+#### 手动生成VSC文件
+
+```python
+
+```
