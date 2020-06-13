@@ -3584,7 +3584,8 @@ add(y=10,x=20)
 ```
 ### functools 模块
 
-1. partial,添加注解信息，本质是对函数包装，不改变原函数。
+#### partial
+partial,添加注解信息，本质是对函数包装，不改变原函数。
 偏函数，把函数部分的参数固定下来，相当于为部分的参数添加了一个固定的默认值，形成一
 个新的函数并返回，从partial生成的新函数，是对原函数的封装
 ```python
@@ -3646,7 +3647,9 @@ In [43]: inspect.signature(newadd)
 Out[43]: <Signature (*args) -> int>
 
 ```
-2. @functools.lru_cache(maxsize=128, typed=False)
+#### lru_cache 
+
+@functools.lru_cache(maxsize=128, typed=False)
 
 Least-recently-used装饰器。lru，最近最少使用。cache缓存
 如果maxsize设置为None，则禁用LRU功能，并且缓存可以无限制增长。当maxsize是二的幂
@@ -3655,41 +3658,476 @@ Least-recently-used装饰器。lru，最近最少使用。cache缓存
 同结果的不同调用
 
 ```python
-In [44]: import functools                                                                                                           
+In [44]: import functools  
 
-In [45]: import time                                                                                                                
+In [45]: import time                    
 
 In [47]: @functools.lru_cache() 
     ...: def add(x,y,z=3): 
     ...:     time.sleep(z) 
     ...:     return x+y 
     ...:                                                                                                                            
+In [48]: add(4,5) #wait
 
-In [48]: add(4,5)                                                                                                                   
 Out[48]: 9
 
-In [49]: add(4.0,5)                                                                                                                 
+In [49]: add(4.0,5) #fast                           
+
 Out[49]: 9
 
-In [50]: add(4,6)                                                                                                                   
+In [50]: add(4,6) #wait                               
+
 Out[50]: 10
 
-In [51]: add(4,6,3)                                                                                                                 
+In [51]: add(4,6,3) #wait                
+
 Out[51]: 10
 
-In [52]: add(6,4)                                                                                                                   
+In [52]: add(6,4) #wait               
+
 Out[52]: 10
 
-In [53]: add(4,y=6)                                                                                                                 
+In [53]: add(4,y=6) #wait                
+
 Out[53]: 10
 
-In [54]: add(x=4,y=6)                                                                                                               
+In [54]: add(x=4,y=6) #wait                  
+
 Out[54]: 10
 
-In [55]: add(y=6,x=4)                                                                                                               
+In [55]: add(y=6,x=4) #wait                 
+
 Out[55]: 10
 ```
+- 通过一个字典缓存被装饰函数的调用和返回值
+- key是什么，分析下面代码
 
+```python
+In [1]: import functools                                                                                                            
+
+In [3]: functools._make_key((4,6),{'z',3},False)                                                                                    
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+<ipython-input-3-be693ec0d190> in <module>
+----> 1 functools._make_key((4,6),{'z',3},False)
+
+~/.pyenv/versions/3.8.3/lib/python3.8/functools.py in _make_key(args, kwds, typed, kwd_mark, fasttypes, tuple, type, len)
+    475     if kwds:
+    476         key += kwd_mark
+--> 477         for item in kwds.items():
+    478             key += item
+    479     if typed:
+
+AttributeError: 'set' object has no attribute 'items'
+
+In [4]: functools._make_key((4,6.3),{},False)                                                                                       
+Out[4]: [4, 6.3]
+
+In [5]: functools._make_key(tuple(),{'z':3,'x':4,'y':6},False)                                                                      
+Out[5]: [<object at 0x7f638acd6f80>, 'z', 3, 'x', 4, 'y', 6]
+
+In [6]: functools._make_key(tuple(),{'z':3,'x':4,'y':6},True)                                                                       
+Out[6]: [<object at 0x7f638acd6f80>, 'z', 3, 'x', 4, 'y', 6, int, int, int]
+
+```
+- 斐波拉契数列递归方法改造
+
+```python
+import functools
+
+@functools.lru_cache()
+
+def fib(n):
+    if n<3:
+        return n
+    return fib(n-1)+fib(n-2)
+
+print([fib(x) for x in range(35)])
+```
+##### 应用
+
+1. 使用前提
+    - 同样的函数参数一定得到同样的结果
+    - 函数执行时间很长，且要执行多次
+2. 本质是函数调用的参数=》返回值
+3. 缺点
+    - 不支持缓存过期，key无法过期、失效
+    - 不支持清除操作
+    - 不支持分布式，是一个单机缓存
+4.适用场景，单机上需要空间换时间的地方，可以用缓存来将计算机编程快速的查询
+
+##### 实验
+
+###### 实现一个cache装饰器，实现可以过期清除功能
+
+- 调用的方式
+
+```python
+from functools import wraps
+import inspect
+
+def re_cache(fn):
+    local_cache={}
+    @wraps(fn)
+    def warpper(*args,**kwargs):
+        ret = fn(*args,**kwargs)
+        return ret
+    return warpper
+
+@re_cache
+def add(x,y,z=6):
+    return x+y+z
+
+# print(add(4,5))
+# print(add(4,z=5))
+# print(add(4,y=6,z=5))
+# print(add(y=6,z=5,x=4))
+print(add(4,5,6))
+```
+- 代码实现
+
+```python
+from functools import wraps
+import inspect
+
+def re_cache(fn):
+    local_cache={} 
+
+    @wraps(fn)
+    def warpper(*args,**kwargs):
+        #参数处理，构建key
+        sig= inspect.signature(fn)
+        params = sig.parameters #只读有序字典
+
+        param_names = [key for key in params.keys()]
+        params_dict = {}
+
+        for i,v in enumerate(args):
+            k = param_names[i]
+            params_dict[k] = v
+
+        params_dict.update(kwargs)
+
+        for k,v in params.items():
+            if k not in params_dict.keys():
+                params_dict[k] = v.default
+
+        key = tuple(sorted(params_dict.items()))
+
+        ret = fn(*args,**kwargs)
+        return ret
+    return warpper
+
+@re_cache
+def add(x,y,z=6):
+    return x+y+z
+
+result = []
+result.append(add(4,5))
+result.append(add(4,y=6,z=5))
+result.append(add(y=6,z=5,x=4))
+result.append(add(4,5,6))
+```
+- 过期功能
+
+```python
+from functools import wraps
+import inspect
+import time
+import datetime
+
+def re_cache(duration):
+    def _cache(fn):
+        local_cache={} 
+
+        @wraps(fn)
+        def warpper(*args,**kwargs):
+            expire_keys = []
+            for k,(_,stamp) in local_cache.items():
+                now = datetime.datetime.now().timestamp()
+                if now - stamp > duration:
+                    expire_keys.append(k)
+            for k in expire_keys:
+                local_cache.pop(k)
+        
+            #参数处理，构建key
+            sig= inspect.signature(fn)
+            params = sig.parameters #只读有序字典
+
+            param_names = [key for key in params.keys()]
+            params_dict = {}
+
+            for i,v in enumerate(args):
+                k = param_names[i]
+                params_dict[k] = v
+
+            # for k,v in params.items():
+            #     params_dict[k] = v
+            params_dict.update(kwargs)
+
+            for k,v in params.items():
+                if k not in params_dict.keys():
+                    params_dict[k] = v.default
+
+            key = tuple(sorted(params_dict.items()))
+
+            if key not in local_cache.keys():
+                local_cache[key] = (fn(*args,**kwargs),datetime.datetime.now().timestamp())
+
+            return key,local_cache[key]
+
+            # ret = fn(*args,**kwargs)
+            # return ret
+        return warpper
+    return _cache
+
+def logger(fn):
+    @wraps(fn)
+    def wrapper(*args,**kwargs):
+        start = datetime.datetime.now()
+        ret = fn(*args,**kwargs)
+        delta = (datetime.datetime.now()- start).total_seconds()  
+        print(fn.__name__,delta) 
+        return ret
+    return wrapper
+
+@logger
+@re_cache(10)
+def add(x,y,z=6):
+    time.sleep(3)
+    return x+y+z
+
+result = []
+result.append(add(4,5))
+result.append(add(4,y=6,z=5))
+result.append(add(y=6,z=5,x=4))
+result.append(add(4,5,6))
+
+for x in result:
+    print(x)
+
+time.sleep(10)
+result = []
+result.append(add(4,5))
+result.append(add(4,y=6,z=5))
+result.append(add(y=6,z=5,x=4))
+result.append(add(4,5,6))
+```
+- 抽象函数
+```python
+from functools import wraps
+import inspect
+import time
+import datetime
+
+def re_cache(duration):
+    def _cache(fn):
+        local_cache={} 
+
+        @wraps(fn)
+        def warpper(*args,**kwargs):
+            def clear_expire(cache):
+                expire_keys = []
+                for k,(_,stamp) in local_cache.items():
+                    now = datetime.datetime.now().timestamp()
+                    if now - stamp > duration:
+                        expire_keys.append(k)
+                for k in expire_keys:
+                    local_cache.pop(k)
+
+            clear_expire(local_cache)
+
+            def make_key():
+        
+                #参数处理，构建key
+                sig= inspect.signature(fn)
+                params = sig.parameters #只读有序字典
+
+                param_names = [key for key in params.keys()]
+                params_dict = {}
+
+                for i,v in enumerate(args):
+                    k = param_names[i]
+                    params_dict[k] = v
+
+                # for k,v in params.items():
+                #     params_dict[k] = v
+                params_dict.update(kwargs)
+
+                for k,v in params.items():
+                    if k not in params_dict.keys():
+                        params_dict[k] = v.default
+
+                return tuple(sorted(params_dict.items()))
+
+            key = make_key()
+
+            if key not in local_cache.keys():
+                local_cache[key] = (fn(*args,**kwargs),datetime.datetime.now().timestamp())
+
+            return key,local_cache[key]
+
+            # ret = fn(*args,**kwargs)
+            # return ret
+        return warpper
+    return _cache
+
+def logger(fn):
+    @wraps(fn)
+    def wrapper(*args,**kwargs):
+        start = datetime.datetime.now()
+        ret = fn(*args,**kwargs)
+        delta = (datetime.datetime.now()- start).total_seconds()  
+        print(fn.__name__,delta) 
+        return ret
+    return wrapper
+
+@logger
+@re_cache(10)
+def add(x,y,z=6):
+    time.sleep(3)
+    return x+y+z
+
+result = []
+result.append(add(4,5))
+result.append(add(4,y=6,z=5))
+result.append(add(y=6,z=5,x=4))
+result.append(add(4,5,6))
+
+for x in result:
+    print(x)
+
+time.sleep(10)
+result = []
+result.append(add(4,5))
+result.append(add(4,y=6,z=5))
+result.append(add(y=6,z=5,x=4))
+result.append(add(4,5,6))
+```
+- 如果使用OrderedDict，要注意，顺序要以签名声明顺序为准
+
+```python
+def make_key():
+
+    #参数处理，构建key
+    sig= inspect.signature(fn)
+    params = sig.parameters #只读有序字典
+
+    param_names = [key for key in params.keys()]
+    params_dict = OrderedDict()
+
+    for i,v in enumerate(args):
+        k = param_names[i]
+        params_dict[k] = v
+
+    # for k,v in params.items():
+    #     params_dict[k] = v
+    # params_dict.update(kwargs)
+
+    #缺省值和关键字参数处理
+    #如果在params_dict中，说明是位置参数
+    #如果不在params_dict中，如果在kwargs中，使用kwargs的值，如果也不在kwargs中，就使用缺省值
+    for k,v in params.items(): #顺序由起那么的顺序定
+        if k not in params_dict.keys():
+            if k in kwargs.keys():
+                params_dict[k] = kwargs.default
+            else:
+                params_dict[k] = v.default
+
+    return tuple(sorted(params_dict.items()))
+```
+###### 写一个命令分发器
+
+- 基础架构
+```python
+cmd_tb1 = {} #全局字典
+
+def reg(cmd,fn): #注册函数
+    cmd_tb1[cmd] = fn
+
+def default_func(): #缺省函数
+    print('Unknown command')
+
+def dispatcher(): #调度函数
+    while True:
+        cmd = input('>>>')
+        if cmd.strip() == '': #退出进程
+            return
+        cmd_tb1.get(cmd,default_fu1nc)()
+
+def foo1(): #自定义函数
+    print('ward')
+
+def foo2():
+    print('python')
+
+reg('war',foo1) #注册函数
+reg('py',foo2)
+
+dispatcher() #循环调度
+
+输出
+>>>python
+Unknown command
+>>>war
+ward
+>>>py
+python
+```
+- 封装
+
+```python
+#注册函数
+def reg(cmd):
+    def _reg(fn):
+        cmd_tbl[cmd] = fn
+        return fn
+    return _reg
+
+#自定义函数
+@reg('war')
+def foo1():
+    print('ward')
+
+@reg('py')
+def foo2():
+    print('python')
+
+def command_dispatcher():
+    cmd_tbl = {} #构建全局函数
+
+    #注册函数
+    def reg(fn):
+        def _reg(fn):
+            cmd_tbl[cmd] = fn
+            return fn
+        return _reg
+
+    #缺省函数
+    def default_func():
+        print('Unknown command')
+
+    #调度器
+    def dispatcher():
+        while True:
+            cmd = input('>>>')
+            if cmd.strip() == '':
+                return
+            cmd_tbl.get(cmd,default_func)()
+    return reg,dispatcher
+
+reg,dispatcher = command_dispatcher()
+
+@reg('war')
+def foo1():
+    print('ward')
+
+@reg('py')
+def foo2():
+    print('python')
+
+dispatcher()
+```
 
 ## 文件IO
 
@@ -3710,10 +4148,21 @@ tell | 指针位置
 ```python
 open(file,mode='r;, buffering=-1,encoding=None,errors=None,newline=None,closefd=True,opener=None)
 ```
+```python
+In [13]: !nano 1.txt                                                                            
 
-1. file 
+In [14]: f = open('1.txt')                                                                      
 
+In [15]: print(f.read())                                                                        
+123
+abc
+
+
+In [16]: f.close()   
+```
+- file 
 打开或者要创建的文件名，不指定路径默认是当前路径
+
 - mode模式
 
 描述字符 | 意义
@@ -3725,34 +4174,58 @@ a | 写入打开，若存在追加
 b | 二进制模式
 t | 缺省的文本模式
 + | 读写打开一个文件。给原来只读、只写方式打开提供缺省的功能
+
 ```python
-f = open('test') #只读
-f.read()
-f = open('test',w) #只写
-f.write('abc')
+In [17]: f = open('1.txt') #默认可读不可写                     
+In [18]: f.read()                                             
+Out[18]: '123\nabc\n'
+In [19]: f.writ('efg') #报错
+In [20]: f.close() 
+In [21]: f = open('1.txt','r')#只读打开，写入或者不存在都会抛异常
+In [24]: f = open('1.txt','w')#只写打开，读取会抛异常，文件不存在则创建，存在则清空。
+In [43]: f = open('3.txt',mode='x')#文件不存在创建并只写打开，存在则抛异常
+In [50]: f = open('1.txt',mode='a')#文件存在，只写打开，追加内容，不存在创建，只写打开。
+
 ```
 r是只读，wxa是只写
 w不管文件是否存在，都会生成全新的内容文件
 a不管文件是否存在，都会在打开文件的末尾追加
 x必须要求文件事先不存在，自己创造一个新文件
+
+```python
+In [54]: f = open('1.txt',mode='rt')#默认即为文本模式
+In [55]: f.read()                                
+Out[55]: '234567'
+
+In [56]: f = open('1.txt',mode='rb')#二进制模式
+In [57]: f.read()
+Out[57]: b'234567'
+
+In [58]: f = open('2.txt',mode='wb')#二进制写入
+In [59]: f.write('中国'.encode()) 
+Out[59]: 6
+In [62]: f.close()
+In [63]: cat 2.txt  
+中国
+```
 t是字符流，将文件的字节按照某种字符编码理解，按照字符操作，默认模式
 b是字节流，将文件按照字节理解，与字符编码无关。
-+为rwax提供缺失的功能，三四获取对象依旧按照rwax自己的特征。
+
++为rwax提供缺失的功能，对象依旧按照rwax自己的特征。
 
 2. 文件指针
-
 mode=r，指针其实0
 mode=a，指针起始在EOF
 tell()显示当前指针位置
 seek(offset，whence)移动指针位置，offset偏移多少字节，whence从哪里开始
-- 文本模式下
-        whence 0 缺省 从头开始 offset只能正整数
-        whence 1 从当前位置 offset只接受0
-        whence 2 从EOF开始 offset只接受0
-- 二进制模式下
-        whence 0 缺省值 表示从头开始，offset只能是正数
-        whence 1 表示当前位置开始，offset可以正负
-        whence 2 表示EOF开始，offset可以正负
+    - 文本模式下
+            whence 0 缺省 从头开始 offset只能正整数
+            whence 1 从当前位置 offset只接受0
+            whence 2 从EOF开始 offset只接受0
+    - 二进制模式下
+            whence 0 缺省值 表示从头开始，offset只能是正数
+            whence 1 表示当前位置开始，offset可以正负
+            whence 2 表示EOF开始，offset可以正负
 
 3. buffering缓冲区
 
