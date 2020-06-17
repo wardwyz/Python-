@@ -4145,6 +4145,7 @@ seek | 文件指针操作
 tell | 指针位置
 
 #### open
+
 ```python
 open(file,mode='r;, buffering=-1,encoding=None,errors=None,newline=None,closefd=True,opener=None)
 ```
@@ -4160,10 +4161,10 @@ abc
 
 In [16]: f.close()   
 ```
-- file 
+###### file 
 打开或者要创建的文件名，不指定路径默认是当前路径
 
-- mode模式
+##### mode模式
 
 描述字符 | 意义
 --- | ---
@@ -4213,31 +4214,204 @@ b是字节流，将文件按照字节理解，与字符编码无关。
 
 +为rwax提供缺失的功能，对象依旧按照rwax自己的特征。
 
-2. 文件指针
-mode=r，指针其实0
+##### 文件指针
+当前字节位置
+
+mode=r，指针起始0
 mode=a，指针起始在EOF
+
 tell()显示当前指针位置
+
 seek(offset，whence)移动指针位置，offset偏移多少字节，whence从哪里开始
     - 文本模式下
-            whence 0 缺省 从头开始 offset只能正整数
-            whence 1 从当前位置 offset只接受0
-            whence 2 从EOF开始 offset只接受0
+        whence 0 缺省 从头开始 offset只能正整数
+        whence 1 从当前位置 offset只接受0
+        whence 2 从EOF开始 offset只接受0
+        ```python
+        In [31]: f = open('test','r+')                                                          
+
+        In [32]: f.tell()                                                                       
+        Out[32]: 0
+
+        In [33]: f.read()                                                                       
+        Out[33]: 'abcd'
+
+        In [34]: f.tell()                                                                       
+        Out[34]: 4
+
+        In [35]: f.seek(0)                                                                      
+        Out[35]: 0
+
+        In [36]: f.read()                                                                       
+        Out[36]: 'abcd'
+
+        In [37]: f.seek(2,0)                                                                    
+        Out[37]: 2
+
+        In [38]: f.read()                                                                       
+        Out[38]: 'cd'
+
+        In [39]: f.seek(2,0)                                                                    
+        Out[39]: 2
+
+        ```
     - 二进制模式下
-            whence 0 缺省值 表示从头开始，offset只能是正数
-            whence 1 表示当前位置开始，offset可以正负
-            whence 2 表示EOF开始，offset可以正负
+        whence 0 缺省值 表示从头开始，offset只能是正数
+        whence 1 表示当前位置开始，offset可以正负
+        whence 2 表示EOF开始，offset可以正负
+        ```python
+        In [56]: f = open('test','rb+')                                                         
 
-3. buffering缓冲区
+        In [57]: f.tell()                                                                       
+        Out[57]: 0
 
--1表示使用缺省大小的buffer，如果二进制模式，是使用io.DEFAULT_BUFFER_SIZE值，模式是4096或者8192，如果文本模式，如果是终端设备，是行缓存方式，如果不是，是使用二进制的策略
+        In [58]: f.read()                                                                       
+        Out[58]: b'abcd'
+
+        In [59]: f.write(b'123')                                                                
+        Out[59]: 3
+
+        ```
+
+##### buffering缓冲区
+-1表示使用缺省大小的buffer。
+如果二进制模式，是使用io.DEFAULT_BUFFER_SIZE值，模式是4096或者8192。
+如果文本模式，如果是终端设备，是行缓存方式，如果不是，是使用二进制模式的策略。
+
 - 0 只在二进制模式下使用，表示关buffer
 - 1 只在文本模式下使用，表示使用行缓冲是。意思是见到换行符就flush
 - 大于1 用指定的buffer大小
 
 buffer缓冲区是一个内存空间，一般来说是一个FIFO队列，到缓冲区满了或者达到阈值，数据才会flush到磁盘
+
 flush()将缓冲区数据写入磁盘
 close()关闭前调用flush()
 io.DEFAULT_BUFFER_SIZE缺省缓冲区大小，字节
+
+- 二进制模式
+
+```python
+In [66]: import io                                                                      
+
+In [67]: f = open('test','w+b')                                                         
+
+In [68]: print(io.DEFAULT_BUFFER_SIZE)                                                  
+8192
+
+In [69]: f.write('wardwangyz'.encode())                                                 
+Out[69]: 10
+
+In [70]: cat test                                                                       
+
+In [72]: f.seek(0)                                                                      
+Out[72]: 0
+
+In [73]: cat test                                                                       
+wardwangyz
+In [74]: f.write('1234'.encode())                                                       
+Out[74]: 4
+
+In [75]: f.flush()                                                                      
+
+In [76]: f.close()                                                                      
+
+In [77]: cat test                                                                       
+1234wangyz
+
+
+In [78]: f = open('test1','w+b',4)                                                      
+
+In [79]: io.DEFAULT_BUFFER_SIZE                                                         
+Out[79]: 8192
+
+In [80]: f.write(b'war')                                                                
+Out[80]: 3
+
+In [81]: cat test1                                                                      
+
+In [82]: f.write(b'd')                                                                  
+Out[82]: 1
+
+In [83]: cat test1                                                                      
+
+In [84]: f.close()                                                                      
+
+In [85]: cat test1                                                                      
+ward
+```
+- 文本模式
+
+```python
+In [86]: f = open('test','w+',1)                                                        
+
+In [87]: f.write('ward')                                                                
+Out[87]: 4
+
+In [88]: cat test                                                                       
+
+In [89]: f.write('wangyz')                                                              
+Out[89]: 6
+
+In [90]: f.write('wangyz'*4)                                                            
+Out[90]: 24
+
+In [91]: cat test                                                                       
+
+In [92]: f.write('\n')                                                                  
+Out[92]: 1
+
+In [93]: cat test                                                                       
+wardwangyzwangyzwangyzwangyzwangyz
+
+In [94]: f.write('hello\npython')                                                       
+Out[94]: 12
+
+In [95]: cat test                                                                       
+wardwangyzwangyzwangyzwangyzwangyz
+hello
+python
+In [96]: f.close()   
+```
+- buffering=0 是一种特殊的二进制模式，不需要内存的buffer，可以看做是FIFO的文件
+
+```python
+In [100]: f = open('test','wb+',0)                                                      
+
+In [101]: f.write(b'm')                                                                 
+Out[101]: 1
+
+In [102]: cat test                                                                      
+m
+In [103]: f.write(b'a')                                                                 
+Out[103]: 1
+
+In [104]: cat test                                                                      
+ma
+In [105]: f.write(b'd')                                                                 
+Out[105]: 1
+
+In [106]: cat test                                                                      
+mad
+In [107]: f.write(b'ward'*4)                                                            
+Out[107]: 16
+
+In [108]: cat test                                                                      
+madwardwardwardward
+In [109]: f.write(b'\n')                                                                
+Out[109]: 1
+
+In [110]: cat test                                                                      
+madwardwardwardward
+
+In [111]: f.write(b'hello\npython')                                                     
+Out[111]: 12
+
+In [112]: cat test                                                                      
+madwardwardwardward
+hello
+python
+In [113]: f.close() 
+```
 
 buffering | 说明
 --- |---
@@ -4251,42 +4425,122 @@ buffering>1 | b模式表示行缓冲大小，缓冲区的值可以超过io.DEFAU
     3. 一般来说，默认缓冲区大小是比较好的选择，除非明确要求调整
     4. 一般编程中，明确知道需要写入磁盘，都会手动flush，而不是自动或者等close
 
-4. encoding 编码，仅文本模式使用
+##### encoding 编码，仅文本模式使用
 
 None表示使用缺省编码，依赖操作系统，Windows下缺省GBK，Linux下缺省UTF-8
 
-5. 其他参数
+##### 其他参数
 - error：什么样的编码错误将被捕捉
     - None和strict表示错误编码抛valueerror
     - ignore 忽略
 - newline：文本模式中换行的转换，可以为None,'','\r','\n','\r\n'
     - 读时，None表示'\r','\n','\r\n'都会转换成'\n';''表示不会自动转换通用换行符;其他合法字符表示换行符就是指定字符，会按照指定字符分行
     - 写时，None表示'\n'都会被替换成为系统缺省行分隔符os.linesep;'\n'或''表示'\n'不替换;其他合法字符表示'\n'会被替换为指定字符
+
+    ```python
+    In [115]: f = open('test2','x')                                                         
+
+    In [116]: f.write('ward\rlike\npython\r\nvery')                                         
+    Out[116]: 22
+
+    In [117]: f.close()                                                                     
+
+    In [118]: newlines = [None,'','\n','\r\n']                                              
+
+    In [119]: for n1 in newlines: 
+        ...:     f = open('test2','r+',newline=n1) 
+        ...:     print(f.readlines()) 
+        ...:     f.close() 
+        ...:                                                                               
+    ['ward\n', 'like\n', 'python\n', 'very']
+    ['ward\r', 'like\n', 'python\r\n', 'very']
+    ['ward\rlike\n', 'python\r\n', 'very']
+    ['ward\rlike\npython\r\n', 'very']
+    ```
 - closefd:关闭文件描述符，True表示关闭，False会在文件关闭后保持这个描述符，用file.fileno() 查看
 
 #### read
 
-read(size=-1)
-size表示读取的多少个字符或者字节，负数或者None表示读取到EOF
+read(size=-1),size表示读取的多少个字符或者字节，负数或者None表示读取到EOF
 
-readline(size=-1)
-一行行读取文件内容。size设置一次能读取行内几个字符或者字节
+```python
+In [129]: f = open('test','r+')                                                         
 
-readline(hint=-1)
-读取所有行的列表。指定hint则返回指定行数
+In [130]: f.write('ward')                                                               
+Out[130]: 4
+
+In [131]: f.write('\n')                                                                 
+Out[131]: 1
+
+In [132]: f.write('中国')                                                               
+Out[132]: 2
+
+In [133]: f.seek(0)                                                                     
+Out[133]: 0
+
+In [134]: f.read(7)                                                                     
+Out[134]: 'ward\n中国'
+
+In [135]: f.read(5)                                                                     
+Out[135]: 'wardw'
+
+In [136]: f.close()                                                                                                                                                 
+
+In [137]: f = open('test','rb+')                                                        
+
+In [138]: f.read(7)                                                                     
+Out[138]: b'ward\n\xe4\xb8'
+
+In [139]: f.read(1)                                                                     
+Out[139]: b'\xad'
+
+In [140]: f.close()     
+```
+
+readline(size=-1)，一行行读取文件内容。size设置一次能读取行内几个字符或者字节
+readline(hint=-1)，读取所有行的列表。指定hint则返回指定行数
+
+```python
+In [141]: f= open('test')                                                               
+
+In [142]: for line in f : 
+     ...:     print(line) 
+     ...:                                                                               
+ward
+
+中国wardward
+
+hello
+
+python
+
+In [143]: f.close()    
+```
 
 #### write
 
-write(s)
-把字符串s写入到文件并返回字符的个数
+write(s),把字符串s写入到文件并返回字符的个数
+writelines(lines),将字符串列表写入文件
 
-writelines(lines)
-将字符串列表写入文件
+```python
+In [152]: f = open('test','w+')                                                         
+
+In [153]: lines = ['abc','123\n','ward']                                                
+
+In [154]: f.writelines(lines)                                                           
+
+In [155]: f.seek(0)                                                                     
+Out[155]: 0
+
+In [156]: f.read()                                                                      
+Out[156]: 'abc123\nward'
+
+In [157]: f.close()          
+```
 
 #### close
 
-flush并关闭文件对象
-文件已关闭，再次关闭没有任何效果
+flush并关闭文件对象,文件已关闭，再次关闭没有任何效果.
 
 #### 其他
 
@@ -4299,11 +4553,35 @@ closed是否已关闭
 
 open files打开文件的上限是1024
 
+```python
+In [159]: lst = []                                                                      
+
+In [160]: for _ in range(2000): 
+     ...:     lst.append(open('test')) 
+     ...:                                                                               
+---------------------------------------------------------------------------
+OSError                                   Traceback (most recent call last)
+<ipython-input-160-4b38704a04c2> in <module>
+      1 for _ in range(2000):
+----> 2     lst.append(open('test'))
+      3 
+
+OSError: [Errno 24] Too many open files: 'test'
+```
+
 解决方案
 
 1. 异常处理
 当出现异常的时候，拦截异常。
 但是，因为很多代码都会出现OSError,不好判断就是因为资源异常限制产生
+
+```python
+In [2]: f = open('test')                                                                
+In [3]: try: 
+   ...:     f.write('abc')     
+   ...: finally: 
+   ...:     f.close() 
+```
 
 2. 上下文管理
 一种特殊的语法交给解释器去释放文件对象
@@ -4320,79 +4598,118 @@ with f:
 #### 实验
 
 1. 指定一个源文件，实现copy到目标目录
+
+```python
+file1 = 'test1'
+file2 = 'test2'
+
+f = open(file1,'w+')
+lines = ['abc','123','ward']
+f.writelines('\n'.join(lines))
+f.seek(0)
+print(f.read())
+f.close()
+
+def copy(src,dst):
+    with open(src) as f1:
+        with open(dst,'w') as f2:
+            f2.write(f1.read())
+        
+copy(file1,file2)
+
+
+cat test1
+cat test2
+abc
+123
+ward
+```
+
 2. 对文件进行单词统计，不区分大小写，并显示单词TOP10 
 
+- 基础函数
+
 ```python
-def wordcount(file='E:\sample.txt'):
-    chars = '''~！@#￥%……&*（）_+{}[]|\\/"'=;:.-<>'''
+d = {}
+with open('sample.txt',encoding='utf8') as f:
+    for line in f:
+        words = line.split()
+        for word in map(str.lower,words):
+            d[word] = d.get(word,0) +1
 
-    with open(file,encoding='utf-8') as f:
-        word_count = {}
-        for line in f:
-            words = line.split()
+print(sorted(d.items(),key=lambda item: item[1],reverse=True))
 
-            for k,v in zip(words,(1,)*len(words)): #(1,)元组配二元组
-                k = k.strip(chars)#取符号
-                k = k.lower()#全部转小写
-                word_count[k] = word_count.get(k,0)+1 #若k不存在返回缺省值0，k存在返回对应的Value
+for k in d.keys():
+    if k.find('path') > -1:
+        print(k)
+```
+
+```python
+def makekey(s:str):
+    chars = set(r"""!:"#./\()[],*-""")
+    key = s.lower()
+    ret = []
+    for i,c in enumerate(key):
+        if c in chars:
+            ret.append(' ')
+        else:
+            ret.append(c)
+    return ''.join(ret).split()
+
+d = {}
+with open('sample.txt',encoding='utf8') as f:
+    for line in f :
+        words = line.split()
+        for wordlist in map(makekey,words):
+            for word in wordlist:
+                d[word] = d.get(word,0) +1
+
+for k,v in sorted(d.items(),key=lambda item: item[1],reverse=True):
+    print(k,v)
+```
+
+另一种思路
+
+```python
+def makekey(s:str):
+    chars = set(r"""!:"#./\()[],*-""")
+    key = s.lower()
+    ret = []
+    start = 0
+    length = len(key)
+
+    for i,c in enumerate(key):
+        if c in chars:
+            if start == i:
+                start += 1
+                continue
+            ret.append(key[start:i])
+            start = i+1
+        else:
+            if start < len(key):
+                ret.append(key[start:])   
+    return ret
+
+d = {}
+with open('sample.txt',encoding='utf8') as f:
+    for line in f :
+        words = line.split()
+        for wordlist in map(makekey,words):
+            for word in wordlist:
+                d[word] = d.get(word,0) +1
                 
-    lst = sorted(word_count.items(),key=lambda x: x[1],reverse=True)
-    for i in range(10):
-        print(str(lst[i]).strip("'()").replace("'",""))
 
-    return lst
-
-wc = wordcount()
-# print(wc)
-print(len(wc))
+for k,v in sorted(d.items(),key=lambda item: item[1],reverse=True):
+    print(k,v)
 ```
-优化
-```python
-def wordcount(file='E:\sample.txt'):
-    chars = '''~！@#￥%……&*（）_+{}[]|\\/"'=;:.<>,_'''
-    charset = set(chars)
-    with open(file,encoding='utf-8') as f:
-        word_count = {}
-        for line in f:
-            words = line.split()
 
-            for k,v in zip(words,(1,)*len(words)): #(1,)元组配二元组
-                k = k.strip(chars)
-                if len(k) < 1:
-                    continue
-                k = k.lower()
-                start = 0
-                for i,c in enumerate(k):
-                    if c in charset:
-                        if start == i:
-                            start = i + 1
-                            continue
-                        key = k[start:i]
-                        word_count[key] = word_count.get(key,0)+1 #若k不存在返回缺省值0，k存在返回对应的Value
-                        start = i + 1
-                else:
-                    key = k[start:]
-                    word_count[key] = word_count.get(key,0) + 1
-                print()
-    lst = sorted(word_count.items(),key=lambda x: x[1],reverse=True)
-    for i in range(10):
-        if i < len(lst):
-            print(str(lst[i]).strip("'()").replace("'",""))
-
-    return lst
-
-wc = wordcount()
-print(wc)
-print(len(wc))
-```
 ### stringIO/BytesIO
 
 #### stringIO
 
 ```from io import StringIO```
 
-内存中，开辟的一个文本模式buffer，像文件一样使用它
-当close方法调用时候，buffer被释放
+内存中，开辟的一个文本模式buffer，像文件一样使用它,当close方法调用时候，buffer被释放
 
 ```python
 from io import StringIO
@@ -4404,16 +4721,21 @@ sio.seek(0)
 print(sio.readline())
 print(sio.getvalue()) # 无视指针，输出全部内容
 sio.close()
+
+True True True
+ward
+
+ward
+python
 ```
 
-- 优点：磁盘操作比内存操作慢的多，内存足够情况下，一般的优化思路就是少落地，减少磁盘IO，大大提高效率
+- 优点：一般来说，磁盘操作比内存操作慢的多，内存足够情况下，一般的优化思路就是少落地，减少磁盘IO，可以大大提高效率
 
 #### BytesIO
 
 ```from io import BytesIO```
 
-内存中，开启的一个二进制模式的buffer，可以像文件一样的操作他
-当close方法调用时，buffer被释放
+内存中，开启的一个二进制模式的buffer，可以像文件一样的操作他，当close方法调用时，buffer被释放
 
 ```python
 from io import BytesIO # 内存中构建
@@ -4425,10 +4747,10 @@ print(bio.readline())
 print(bio.getvalue()) # 无视指针，输出全部内容
 bio.close()
 ```
+
 #### file-like对象
 
-类文件对象，可以像文件对象一样操作
-socket对象、输入输出对象（stdin,stdout)都是类文件对象
+类文件对象，可以像文件对象一样操作，socket对象、输入输出对象（stdin,stdout)都是类文件对象
 
 ```python
 from sys import stdout
@@ -4442,39 +4764,31 @@ f.write('ward')
 #### OS模块
 
 ```python
-In [6]: from os import path
+from os import path
+p = path.join('/etc','sysconfig','network')
+print(type(p))
+print(path.exists(p))
+print(path.split(p))
+print(path.abspath('.'))
+p = path.join('o:/',p,'text.txt')
+print(path.dirname(p))
+print(path.basename(p))
+print(path.splitdrive(p))
 
-In [7]: p = path.join('/etc','sysconfig','network')
-
-In [8]: type(p),p
-Out[8]: (str, '/etc\\sysconfig\\network')
-
-In [9]: path.exists(p)
-Out[9]: False
-
-In [10]: path.split(p)
-Out[10]: ('/etc\\sysconfig', 'network')
-
-In [11]: path.abspath('.')
-Out[11]: 'C:\\Users\\28701\\OneDrive\\python'
-
-In [12]: p = path.join('o:/',p,'test.txt')
-
-In [13]: path.dirname(p)
-Out[13]: 'o:/etc\\sysconfig\\network'
-
-In [14]: path.basename(p)
-Out[14]: 'test.txt'
-
-In [15]: path.splitdrive(p)
-Out[15]: ('o:', '/etc\\sysconfig\\network\\test.txt')
-```
-```python
 p1 = path.abspath(__file__)
+# print(p1,path.basename(p1))
+# while p1 != path.basename(p1):
+#     p1 = path.dirname(p1)
 print(p1,path.basename(p1))
-while p1 != path.dirname(p1):
-    p1 = path.dirname(p1)
-    print(p1,path.basename(p1))
+
+<class 'str'>
+True
+('/etc/sysconfig', 'network')
+/home/python/python383
+/etc/sysconfig/network
+text.txt
+('', '/etc/sysconfig/network/text.txt')
+/home/python/python383/os.py os.py
 ```
 
 操作系统平台
@@ -4498,14 +4812,15 @@ os.chown(path,uid,gid)
 
 - 初始化
 
- ```python
-In [2]: from pathlib import Path
-In [3]: p = Path()
-In [4]: type(p)
-Out[4]: pathlib.WindowsPath
+```python
+In [8]: from pathlib import Path
+In [9]: p = Path()#当前目录下初始化
+In [10]: p = Path('a','b','c/d')#当前目录下的a/b/c/d
+In [11]: p =Path('/etc')#根下的etc
 ```
 
 - 路径拼接和分解
+
 1. 操作符/
     - path对象/path对象
     - path对象/字符串 
@@ -4551,6 +4866,7 @@ Out[30]: WindowsPath('/a/b')
 In [31]: for x in p.parents:
     ...:     print(x)
     ...:
+
 \a\b\c
 \a\b
 \a
@@ -4565,7 +4881,6 @@ In [31]: for x in p.parents:
 - with_name 替换目录最后一个部分并返回一个新的路径
 
 ```python
-
 In [32]: p = Path('/ward/mysqlinstal.tar.gz')
 
 In [33]: p.name
@@ -4615,7 +4930,6 @@ Out[39]: WindowsPath('README.txt')
 - iterdir() 迭代当前目录
 
 ```python
-#遍历，并判断文件类型，如果是目录是否可以判断其是否为空
 from pathlib import Path
 p = Path()
 p /= 'a'
@@ -4632,17 +4946,46 @@ for x in p.parents[len(p.parents)-1].iterdir():
     else:
         print('other file')
 ```
+
 6. 通配符
 - glob(pattern) 通配给定的模式
 - rglob(pattern) 通配给定的模式，递归目录
 返回一个生成器
 
-```list(Path().glob('test*')) ```
+```python
+list(Path().glob('test*'))#返回当前目录对象下的test开头的文件 
+list(Path().glob('**/*.py'))#递归所有目录，等同rglob
+```
 
 7. 匹配
 - match(pattern) 模式匹配，成功返回True **任意级
+```python
+In [39]: Path('a/b.py').match('*.py')                                                   
+Out[39]: True
+
+In [40]: Path('a/b/c.py').match('b/*.py')                                               
+Out[40]: True
+
+In [41]: Path('a/b/c.py').match('a/*.py')                                               
+Out[41]: False
+
+In [42]: Path('a/b/c.py').match('a/*/*.py')                                             
+Out[42]: True
+
+In [43]: Path('a/b/c.py').match('**/*.py')                                              
+Out[43]: True
+```
 - stat() 相当于stat命令
 - lstat() 同stat() 但如果是符号链接，则显示符号链接本身的文件信息
+```python
+In [48]: p = Path('test1')                                                              
+
+In [49]: p.stat()                                                                       
+Out[49]: os.stat_result(st_mode=33204, st_ino=116775, st_dev=64770, st_nlink=1, st_uid=1001, st_gid=1001, st_size=12, st_atime=1592014606, st_mtime=1592014559, st_ctime=1592014559)
+
+In [50]: p.lstat()                                                                      
+Out[50]: os.stat_result(st_mode=33204, st_ino=116775, st_dev=64770, st_nlink=1, st_uid=1001, st_gid=1001, st_size=12, st_atime=1592014606, st_mtime=1592014559, st_ctime=1592014559)
+```
 
 8. 文件操作
 - open(mode='r',buffering=-1,encoding=None,errors=None,newline=None)
@@ -4651,6 +4994,41 @@ for x in p.parents[len(p.parents)-1].iterdir():
 - read_text(encoding=None,errors=None) 以'rt'方式读取路径对应文件，返回文本
 - Path.with_bytes(data) 以'wb'方式写入数据到路径对应文件
 - write_text(data,encoding=None,errors=None) 以'wt'方式写入字符串到路径对应文件
+
+```python
+In [51]: p = Path('my_binary_file')                                                     
+
+In [52]: p.write_bytes(b'Binary file contents')                                         
+Out[52]: 20
+
+In [53]: p.read_bytes()                                                                 
+Out[53]: b'Binary file contents'
+
+In [54]: p = Path('my_text_file')                                                       
+
+In [55]: p.write_text('Text file contents')                                             
+Out[55]: 18
+
+In [56]: p.read_text()                                                                  
+Out[56]: 'Text file contents'
+
+In [57]:                                                                                
+
+In [57]: from pathlib import Path                                                       
+
+In [58]: p =Path('test1')                                                               
+
+In [59]: p.write_text('hello python')                                                   
+Out[59]: 12
+
+In [60]: p.read_text()                                                                  
+Out[60]: 'hello python'
+
+In [61]: with p.open() as f: 
+    ...:     print(f.read(5)) 
+    ...:                                                                                
+hello
+```
 
 
 
@@ -4663,26 +5041,66 @@ for x in p.parents[len(p.parents)-1].iterdir():
 copyfileobj(fsrc,fdst[,length])
 文件对象复制，fsrc和fdst是open打开的文件对象，复制内容，fdst要求可写，length指定buffer大小
 
+```python
+In [68]: import shutil                                                                  
+
+In [69]: with open('test1','r+') as f1: 
+    ...:     f1.write('abcd\n1234') 
+    ...:     f1.flush() 
+    ...:     with open('test2','w+') as f2: 
+    ...:         shutil.copyfileobj(f1,f2) 
+    ...:                                                                                
+
+In [70]: cat test1                                                                      
+abcd
+1234hon
+In [71]: cat test2                                                                      
+hon
+```
+
 copyfile(src,dst,*,follow_symlinks=True)
 复制文件内容，不含元数据。src,dst为文件的路径字符串
 
+```python
+In [86]: shutil.copyfile('test1','test2')                                               
+Out[86]: 'test2'
+
+In [87]: cat test1                                                                      
+abcd
+1234honabcd
+1234abcd
+1234
+In [88]: cat test2                                                                      
+abcd
+1234honabcd
+1234abcd
+1234
+```
 copymode(src,dst,*,follow_symlinks=True)
 仅仅复制权限
+
+```In [81]: shutil.copymode('test1','test2')```
 
 copystat(src,dst,*,follow_symlinks=True)
 复制元数据，stat包含权限
 
+```In [90]: shutil.copystat('test1','test2')```
+
 copy(src,dst,*,follow_symlinks=True)
 复制文件内容、权限和部分元数据，不包含创建时间和修改时间
 
+```In [95]: shutil.copy('test1','test2')```
+
 copy2 比copy多了复制全部元数据，但需要平台支持
+
+```In [98]: shutil.copy2('test1','test2')```
 
 copytree(src,dst,symlinks=Flase,ignore=None,copy_function=copy2,ignore_dangling_symlinks=False)递归复制目录
 
 #### rm删除
 
 shutil.rmtree(path,ignore_error=False,onerror=Nore)
-递归删除
+递归删除文件夹
 
 #### move移动
 
@@ -4691,7 +5109,8 @@ move(src,dst,copy_function=copy2)
 
 ### CSV文件
 
-Comma-Swparated Values
+逗号分隔符值Comma-Swparated Values
+
 CSV是一个被行分隔符、列分隔符划分成行和列的文本文件
 CSV不指定字符编码
 
@@ -4704,5 +5123,795 @@ CSV不指定字符编码
 #### 手动生成VSC文件
 
 ```python
+from pathlib import Path
+
+p = Path('test.csv')
+parent = p.parent
+if not parent.exists():
+    parent.mkdir(parents=True)
+
+csv_body = '''\
+id,name,age,comment
+1,zs,18,'I'm ward'
+2,df,45,'this is good'
+3,ww,34,''你好
+
+计算机
+"
+'''
+p.write_text(csv_body)
+```
+
+#### CSV模块
+
+```reader(csvfile,dialect='excel',**fmtparams)```
+返回DictReader对象，是一个行迭代器。
+- delimmiter列分隔符，逗号
+- lineterminator 行分隔符\r\n
+- quotechar 字段的引用符号，缺省为",双引号
+    双引号的处理：
+    doublequote双引号的处理，默认为True。如果和quotechar为同一个，True则使用2个双引号表示，False表示使用转义字符将作为双引号的前缀。
+    escapechar 一个转义字符默认为None
+    quoting指定双引号的规则，QUOTE_ALL所有字段；QUOTE_MINIMAL特殊字符字段；QUOTE_MONNUMERIC非数字字段；QUOTE_NONE都不适用引导。
+
+```writer(csvfile,dialect='excel',**fmtparams)```
+返回DictWriter的额实例，主要方法有writerow,writerows.
+
+```python
+import csv
+from pathlib import Path
+
+p = Path('test.csv')
+with open(str(p)) as f:
+    reader = csv.reader(f)
+    print(next(reader))
+    print(next(reader))
+
+rows = [
+    [4,'tom',22,'tom'],
+    (5,'jerry',24,'jerry'),
+    (6,'justin',22,'just\t"in'),
+    'abcdefghi',
+    ((1,),(2,))
+]
+row = rows[0]
+
+with open(str(p),'a') as f:
+    writer = csv.writer(f)
+    writer.writerow(row)
+    writer.writerows(rows)
+```
+#### configparser模块
+
+configparser模块的ConfigParser类可以用来处理ini文件。
+
+将section当做key，section存储着键值对组成的字典，可以把ini配置文件当做一个嵌套的字典，默认使用的是有序字典。
+
+```read(filenames,encoding=None)```
+读取ini文件，可以是单文件，也可以是文件列表，可以指定编码。
+
+```sections()```
+返回section列表。缺省section不包含在内
+
+```add_section(section_name)```
+增加一个section
+
+```has_section(section_name)```
+判断section是否存在
+
+```options(section)```
+返回section的所有option，会追加缺省section的option
+
+```has_option(section,option)```
+判断section是否存在option
+
+```get(section,option,*,raw=False,vars=None[,fallback])```
+从指定的段的选项上取值，如果找到返回，如果没找到就去找DEFAUL段有没有
+
+```getint(section,option,*,raw=False,vars=None[,fallback])
+   getfloat(section,option,*,raw=False,vars=None[,fallback])
+   getboolean(section,option,*,raw=False,vars=None[,fallback])
+```
+上面3个方法和get一样，返回指定类型数据
+
+```items(raw=False,vars=None)
+   items(section,raw=False,vars=None)
+```
+没有section，则返回所有section名字及其对象；如果指定section，则返回这个指定的section的键值对组成二元组。
+
+```set(section,option,value)```
+section存在的情况下，写入option=value，要求option、value必须是字符串
+
+```remove_section(section)```
+移除section下的option
+
+```remove_option(section,option)```
+移除section下的option
+
+```write(fileobject,space_around_delimiters=True)```
+将当前config的所有内容写入到fileobject中，一般open函数使用w模式
+
+```python
+from configparser import ConfigParser
+
+filename = 'test.ini'
+newfilename = 'mysql.ini'
+
+cfg = ConfigParser()
+cfg.read(filename)
+print(cfg.sections())
+print(cfg.has_section('client'))
+
+print(cfg.items('mysqld'))
+for k,v in cfg.items():
+    print(k,type(v))
+    print(k,cfg.items(k))
+
+tmp = cfg.get('mysqld','port')
+print(type(tmp),tmp)
+print(cfg.get('mysqld','a'))
+# print(cfg.get('mysqld','ward'))
+print(cfg.get('mysqld','ward',fallback='python'))
+
+tmp = cfg.getint('mysqld','port')
+print(type(tmp),tmp)
+
+if cfg.has_section('test'):
+    cfg.remove_section('test')
+
+cfg.add_section('test')
+cfg.set('test','test1','1')
+cfg.set('test','test2','2')
+
+with open(newfilename,'w') as f:
+    cfg.write(f)
+
+print(cfg.getint('test','test2'))
+
+cfg.remove_option('test','test2')
+
+cfg['test']['x'] = '100'
+cfg['test2'] = {'test2':'1000'}
+
+print('x' in cfg['test'])
+print('x' in cfg['test2'])
+
+print(cfg._dict)
+
+with open(newfilename,'w') as f:
+    cfg.write(f)
+
+
+['mysql', 'mysqld']
+False
+[('a', 'test'), ('datadir', '/dbserver/data'), ('port', '33060'), ('chararcter-set-server', 'utf8'), ('sql_mode', 'NO_ENGINE_SUBSTITUTION,STRICT_TABLES')]
+DEFAULT <class 'configparser.SectionProxy'>
+DEFAULT [('a', 'test')]
+mysql <class 'configparser.SectionProxy'>
+mysql [('a', 'test'), ('default-character-set', 'utf8')]
+mysqld <class 'configparser.SectionProxy'>
+mysqld [('a', 'test'), ('datadir', '/dbserver/data'), ('port', '33060'), ('chararcter-set-server', 'utf8'), ('sql_mode', 'NO_ENGINE_SUBSTITUTION,STRICT_TABLES')]
+<class 'str'> 33060
+test
+python
+<class 'int'> 33060
+2
+True
+False
+<class 'dict'>
+```
+### 序列化和反序列化
+
+要设计一套协议，按照某种规则，把内存中数据保存到文件中。文件是一个字节序列，所以必须把数据转换成字节序列，输出到文件，这就是序列化。反之，从文件的字节序列恢复到内存，就是反序列化。
+
+#### 定义
+
+- serialization序列化，将内存中对象存储下来，把它变成一个个字节。 --> 二进制
+
+- deserialization反序列化，将文件的一个个字节恢复成内存中对象。 <-- 二进制
+
+序列化保存到文件就是持久化。可以将数据序列化后持久化，或者网络传输；也可以将从文件中或者网络接收到的字节序列反序列化。
+
+#### pickle库
+
+Python中的序列化、反序列化模块
+- dumps对象序列化为bytes对象
+- dump对象序列化到文件对象，就是存入文件
+- loads从bytes对象反序列化
+- load对象反序列化，从文件读取数据
+
+```python
+import pickle
+
+filename = 'ser'
+d = {'a':1,'b':'abc','c':[1,2,3]}
+l = list('123')
+i = 99
+
+with open(filename,'wb') as f:
+    pickle.dump(d,f)
+    pickle.dump(l,f)
+    pickle.dump(i,f)
+
+with open(filename,'rb') as f:
+    print(f.read(),f.seek(0))
+    for _ in range(3):
+        x = pickle.load(f)
+        print(type(x),x)
+
+b'\x80\x04\x95#\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01a\x94K\x01\x8c\x01b\x94\x8c\x03abc\x94\x8c\x01c\x94]\x94(K\x01K\x02K\x03eu.\x80\x04\x95\x11\x00\x00\x00\x00\x00\x00\x00]\x94(\x8c\x011\x94\x8c\x012\x94\x8c\x013\x94e.\x80\x04Kc.' 0
+<class 'dict'> {'a': 1, 'b': 'abc', 'c': [1, 2, 3]}
+<class 'list'> ['1', '2', '3']
+<class 'int'> 99        
+```
+```python
+import pickle
+
+class AA:
+    tttt = 'ABC'
+    def show(self):
+        print('abc')
+
+a1 = AA()
+
+sr = pickle.dumps(a1)
+print('sr={}'.format(sr))
+
+a2 = pickle.loads(sr)
+print(a2.tttt)
+a2.show()
+
+
+sr=b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00\x8c\x08__main__\x94\x8c\x02AA\x94\x93\x94)\x81\x94.'
+ABC
+abc
+```
+上面的例子中，其实就保存了一个类名，因为所以的其他东西都是类定义的东西，是不变的，所以只序列化一个AA类名，反序列化的时候找到的类就可以恢复一个对象。
+
+```python
+import pickle
+
+class AAA:
+    def __init__(self):
+        self.tttt = 'abc'
+
+a1 = AAA()
+#序列化
+ser = pickle.dumps(a1)
+print('ser={}'.format(ser))
+#反序列化
+a2 = pickle.loads(ser)
+print(a2,type(a2))
+print(a2.tttt)
+print(id(a1),id(a2))
+```
+可以看出这回除了必须保存的AAA，还序列化了tttt和abc，因为这是每一个对象自己的属性，每一个对象不一样的，所以这些数据就需要序列化。
+
+#### 实验
+
+定义类AAA，并序列化到文件
+
+```python
+import pickle
+
+class AAA:
+    def __init__(self):
+        self.tttt = 'abc'
+
+aaa = AAA()
+sr = pickle.dumps(aaa)
+print(len(sr))
+
+file = 'sr'
+with open(file,'wb') as f:
+    pickle.dump(aaa,f)
+```
+将产生的序列化文件发送到其他节点上
+
+增加一个x.py文件（如下文件），最后执行脚本$python x.py
+
+```python
+import pickle
+
+class AAA:
+    def show(self):
+        print('xyz')
+
+with open('sr','rb') as f:
+    a = pickle.load(f)
+    print(a)
+    a.show()
+
+<__main__.AAA object at 0x7f2390b31c40>
+xyz
+```
+但是这里的AAA和原来的定义完全不同，序列化、反序列化必须保证使用同一套类定义，否则会带来不可预料的结果
+
+#### 序列化应用
+
+1. Json
+是一种轻量级的书籍交换格式，采用完全独立于汇编语言的文本格式来存储和表示数据。
+
+- Json的数据类型
+    - 值
+    双引号引起来的字符串，数值，true和false，null，对象，数组
+    ![](img/2020-06-16-16-32-01.png)
+    - 字符串
+    由双引号包围起来的任意字符的组合，可以有转义字符
+    - 数值
+    有正负、整数、浮点数
+    - 对象
+    无序的键值对的集合
+    格式：{key1:value1,……,keyn:valulen}
+    key必须是一个字符串，需要双引号包围这个字符串
+    value可以是任意合法的值
+    ![](img/2020-06-16-16-35-27.png)
+    - 数值
+    有序的值得集合
+    格式：[val1,……,valn]
+    ![](img/2020-06-16-16-36-16.png)
+    - 实例
+    ```json
+    {
+        "person":[
+            {
+                "name":"tom"
+                "age":18
+            },
+            {
+                "name":"ward"
+                "age":20
+            }
+        ],
+        "total":2
+    }
+    ```
+2. json模块
+
+python支持少量内建数据类型到json类型的转换
+
+Python类型 | Json类型
+---|---
+Ture | true
+False | false
+None | null
+str | string
+int | integer
+float | float
+list | array
+dict | object
+
+- 常用方法
+
+python类型 |Json类型
+---|---
+dumps | json编码
+dump | json编码并存入文件
+loads | json编码
+load | json编码，从文件读取数据
+
+```python
+import json
+d = {'name':'Tom','age':20,'interest':['music','movie']}
+j = json.dumps(d)
+print(j)
+
+d1=json.loads(j)
+print(d1)
+
+{"name": "Tom", "age": 20, "interest": ["music", "movie"]}
+{'name': 'Tom', 'age': 20, 'interest': ['music', 'movie']}
+```
+
+3. MessagePack
+是一个基于二进制高效的对象序列化类库，可以跨语言通信，比json更快速轻巧
+
+1. 安装
+```pip install msgpack-python```
+
+2. 常用方法
+
+packb序列化对象，提供了dumps来兼容pickle和json，保存到文件对象，提供了dump来兼容
+unpackb反序列化对象，提供了loads来兼容，保存到文件，提供了load来兼容
+
+```python
+import msgpack 
+import json
+
+#源数据
+d = {'person':[{'name':'tome','age':18},{'name':'ward','age':27}],'total':2}
+
+j = json.dumps(d)
+m = msgpack.dumps(d)
+
+print('json = {},msgpack = {}'.format(len(j),len(m)))
+print(j.encode(),len(j.encode()))
+print(m)
+
+u = msgpack.unpackb(m)
+print(type(u),u)
+
+u = msgpack.unpackb(m,encoding='utf8')
+print(type(u),u)
+
+
+json = 82,msgpack = 48
+b'{"total": 2, "person": [{"age": 18, "name": "tome"}, {"age": 27, "name": "ward"}]}' 82
+b'\x82\xa5total\x02\xa6person\x92\x82\xa3age\x12\xa4name\xa4tome\x82\xa3age\x1b\xa4name\xa4ward'
+<class 'dict'> {b'total': 2, b'person': [{b'age': 18, b'name': b'tome'}, {b'age': 27, b'name': b'ward'}]}
+<class 'dict'> {'total': 2, 'person': [{'age': 18, 'name': 'tome'}, {'age': 27, 'name': 'ward'}]}
+```
+
+### argparse模块
+
+一个可执行文件或者脚本都可以接受参数，argparse模块可以把这些参数传递给程序。
+
+- 参数分类
+位置参数(/etc)、选项参数(-a\--help)
+
+#### 基本解析
+
+```python
+import argparse
+
+parser = argparse.ArgumentParser()#获得一个参数解析器
+agrs = parser.parse_args()#分析参数
+parser.print_help()#打印帮助
+
+
+usage: test.py [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+argparse不仅仅做了参数定义和解析，还自动帮助生成了帮助信息，尤其是usage，可以看到现在定义的参数是否是自己想要的
+
+#### 解析器参数
+
+参数名称 | 说明
+--- | ---
+prog | 程序的名字，缺省使用sys.argv[0]
+add_help | 自动为解析器增加 -h 和 --help 选项，默认为True
+description | 为程序功能添加描述
+
+```parser = argparse.ArgumentParser(prog='ls',add_help=True,description='list directory contents')```
+
+#### 位置参数解析
+
+ls基本功能应该解决目录内容的打印，打印的时候应该指定目录路径，需要位置参数
+
+```python
+import argparse
+#获得一个参数解析器
+parser = argparse.ArgumentParser(prog='ls',add_help=True,description='list directory contents')
+parser.add_argument('path')
+args = parser.parse_args()#分析参数
+parser.print_help()#打印帮助
+
+usage: ls [-h] path
+ls: error: the following arguments are required: path
+```
+程序等定义为：ls [-h] path ；-h 为帮助，可有可无，path为位置参数，必须提供。
+
+#### 传参
+
+```parse_args(args=None,namespace=None)```
+args参数裂变，一个可迭代对象，内部会把可迭代对象转换成list，如果为None则使用命令行传入参数，非None则使用args参数迭代对象。
+
+```python
+import argparse
+#获得一个参数解析器
+parser = argparse.ArgumentParser(prog='ls',add_help=True,description='list directory contents')
+parser.add_argument('path')
+args = parser.parse_args(('/etc',))#分析参数,同时传入可迭代参数
+print(args)#打印名词空间中收集的参数
+parser.print_help()#打印帮助
+
+
+Namespace(path='/etc')
+usage: ls [-h] path
+
+list directory contents
+
+positional arguments:
+  path
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+Namespace(path'/etc')里面的path参数存储在了一个Namespace对象内的属性上，可以通过Namespace对象属性来访问。
+
+#### 非必须位置参数
+
+上面的代码必须输入位置参数否则报错，但有时候ls命令不输入任何路径的话就表示列出当前目录的文件列表。
+
+```python
+import argparse
+#获得一个参数解析器
+parser = argparse.ArgumentParser(prog='ls',add_help=True,description='list directory contents')
+parser.add_argument('path',nargs='?',default='.',help='path help')#位置参数，可有可无，缺省值，帮助
+
+args = parser.parse_args(('/etc',))#分析参数，同时传入可迭代参数
+print(args)
+parser.print_help()#打印帮助
+
+
+Namespace(path='/etc')
+usage: ls [-h] [path]
+
+list directory contents
+
+positional arguments:
+  path        path help
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+可以看出path也成了可选的位置参数，没有提供就使用默认值'.'表示当前路径
+- help表示帮助文档中这个参数的描述
+- nargs表示这个参数接受结果参数，'?'表示可有可无，'+'表示至少一个，'*'可以任意个，数字表示必须是指定数目个
+- default表示如果不提供该参数，就使用这个值。一般和'?'、'*'配合，因为他们都可以不提供位置参数，不提供就是用缺省值。
+
+#### 选项参数
+
+1. -l 的实现
+
+```parser.add_argument('-l')```就增加了选项参数，参数定义为```ls [-h] [-l L] [path]```和我们要的形式有一点出入，我们期望的是[-h]，可以通过下面的方法解决。
+```parser.add_argument('-l',action='store_ture')```看到命令定义变成了```ls [-h] [-l] [path]```
+提供-l选项，例如```ls -l```得到Namespace(l=True,path='.'),ls得到Namespace(l=False,path='.')这样同True、False来判断用户是否提供了该选项。
+
+2. -a的实现
+
+```parser.add_argument('-a','-all',action='store_true')```长短选项可以同时给出
+
+```python
+import argparse
+#获得一个参数解析器
+parser = argparse.ArgumentParser(prog='ls',add_help=True,description='list directory contents')
+parser.add_argument('path',nargs='?',default='.',help='directory')#位置参数，可有可无，缺省值，帮助
+
+parser.add_argument('-l',action='store_true',help='use a long listing format')
+parser.add_argument('-a','--all',action='store_true',help='show all files,do not ignore entries starting with .')
+
+args = parser.parse_args(())#分析参数，同时传入可迭代参数
+print(args)
+parser.print_help()#打印帮助
+
+
+
+Namespace(all=False, l=False, path='.')
+usage: ls [-h] [-l] [-a] [path]
+
+list directory contents
+
+positional arguments:
+  path        directory
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -l          use a long listing format
+  -a, --all   show all files,do not ignore entries starting with .
+```
+
+#### ls业务功能实现
+
+1. 列出所有指定路径的文件，默认是不递归
+2. -a显示所有文件，包含隐藏文件
+3. -l详细列表模式显示
+
+```python
+import argparse
+from pathlib import Path
+from datetime import datetime
+#获得一个参数解析器
+parser = argparse.ArgumentParser(prog='ls',add_help=True,description='list directory contents')
+parser.add_argument('path',nargs='?',default='.',help='directory')#位置参数，可有可无，缺省值，帮助
+
+parser.add_argument('-l',action='store_true',help='use a long listing format')
+parser.add_argument('-a','--all',action='store_true',help='show all files,do not ignore entries starting with .')
+
+args = parser.parse_args(())#分析参数，同时传入可迭代参数
+print(args)
+parser.print_help()#打印帮助
+
+def listdir(path,all=False):
+    """列出本目录文件"""
+    p = Path(path)
+    for i in p.iterdir():
+        if not all and i.name.startswith('.'):
+            continue
+    yield i.name
+
+print(list(listdir(args.path)))
+
+def getfiletype(f:Path):
+    if f.is_dir():
+        return 'd'
+    elif f.is_block_device():
+        return 'b'
+    elif f.is_char_device():
+        return 'c'
+    elif f.is_socket():
+        return 's'
+    elif f.is_symlink():
+        return 'l'
+    else:
+        return '-'
+
+def listdirdetail(path,all=False):
+    p = Path(path)
+    for i in p.iterdir():
+        if not all and i.name.startswith('.'):
+            continue
+        stat = i.stat()
+        t = getfiletype(i)
+        mode = oct(stat.st_mode)[-3:]
+        atime = datetime.fromtimestamp(stat.st_atime).strftime('%Y %m %d %H:%M:%S')
+        yield (t,mode,stat.st_uid,stat.st_gid,stat.st_size,atime,i.name)
+
+print(list(listdirdetail(args.path)))
+
+
+Namespace(all=False, l=False, path='.')
+usage: ls [-h] [-l] [-a] [path]
+
+list directory contents
+
+positional arguments:
+  path        directory
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -l          use a long listing format
+  -a, --all   show all files,do not ignore entries starting with .
+['test.csv']
+[('-', '664', 1001, 1001, 167, '2020 06 10 19:43:15', 'test.py'), ('-', '664', 1001, 1001, 0, '2020 06 10 19:41:10', 'test.csv')]
+```
+
+mode是整数，八进制描述的权限，最终显示为rwx的格式
+
+```python
+modelist = ['r','w','x','r','w','x','r','w','x']
+def _getmodestr(mode:int):
+    m = mode & 0o777
+    mstr = ''
+    for i,v in enumerate(bin(m)[-9:]):
+        if v =='1':
+            mstr += modelist[i]
+        else:
+            mstr += '-'
+    return mstr
+
+```
+
+完整代码
+
+```python
+import argparse
+from pathlib import Path
+from datetime import datetime
+#获得一个参数解析器
+parser = argparse.ArgumentParser(prog='ls',add_help=True,description='list directory contents')
+parser.add_argument('path',nargs='?',default='.',help='directory')#位置参数，可有可无，缺省值，帮助
+
+parser.add_argument('-l',action='store_true',help='use a long listing format')
+parser.add_argument('-a','--all',action='store_true',help='show all files,do not ignore entries starting with .')
+
+
+def listdir(path,all=False):
+    def _getfiletype(f:Path):
+        if f.is_dir():
+            return 'd'
+        elif f.is_block_device():
+            return 'b'
+        elif f.is_char_device():
+            return 'c'
+        elif f.is_socket():
+            return 's'
+        elif f.is_symlink():
+            return 'l'
+        else:
+            return '-'
+
+    modelist = ['r','w','x','r','w','x','r','w','x']
+    def _getmodestr(mode:int):
+        m = mode & 0o777
+        mstr = ''
+        for i,v in enumerate(bin(m)[-9:]):
+            if v =='1':
+                mstr += modelist[i]
+            else:
+                mstr += '-'
+        return mstr
+
+    def _listdir(path,all=False,detail=False):
+        p = Path(path)
+        for i in p.iterdir():
+            if not all and i.name.startswith('.'):
+                continue
+            if not detail:
+                yield (i.name,)
+            else:
+                stat = i.stat()
+                mode = _getfiletype(i) + _getmodestr(stat.st_mode)
+                mode = oct(stat.st_mode)[-3:]
+                atime = datetime.fromtimestamp(stat.st_atime).strftime('%Y %m %d %H:%M:%S')
+                yield (t,mode,stat.st_uid,stat.st_gid,stat.st_size,atime,i.name)
+
+    yield from sorted(_listdir(path,all,detail),key=lambda x: x[len(x)-1])
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    print(args)
+    parser.print_help()
+    files = listdir(arg.path,args.all,args.l)
+    print(list(files))
+
+
+Namespace(all=False, l=False, path='.')
+usage: ls [-h] [-l] [-a] [path]
+
+list directory contents
+
+positional arguments:
+  path        directory
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -l          use a long listing format
+  -a, --all   show all files,do not ignore entries starting with .
+Traceback (most recent call last):
+  File "/home/python/python383/test.py", line 58, in <module>
+    files = listdir(arg.path,args.all,args.l)
+NameError: name 'arg' is not defined  
+```
+
+最终代码
+
+```python
+import argparse
+import stat
+from pathlib import Path
+from datetime import datetime
+#获得一个参数解析器
+parser = argparse.ArgumentParser(prog='ls',description='list directory contents',add_help=False)
+parser.add_argument('path',nargs='?',default='.',help='directory')#位置参数，可有可无，缺省值，帮助
+
+parser.add_argument('-l',action='store_true',help='use a long listing format')
+parser.add_argument('-a','--all',action='store_true',help='show all files,do not ignore entries starting with .')
+parser.add_argument('-h','--hunman-readable',action='store_true',help='with -l,print size in hunman readable format')
+
+def listdir(path,all=False,detail=False,hunman=False):
+    
+    def _gethuman(size:int):
+        units = ' KMGTP'
+        depth = 0
+        while size>=1000:
+            size = size //1000
+            depth += 1
+        return '{}{}'.format(size,units[depth])
+
+    def _listdir(path,all=False,detail=False,hunman=False):
+        p = Path(path)
+        for i in p.iterdir():
+            if not all and i.name.startswith('.'):
+                continue
+            if not detail:
+                yield (i.name,)
+            else:
+                st = i.stat()
+                mode = stat.filemode(st.st_mode)
+                atime = datetime.fromtimestamp(st.st_atime).strftime('%Y %m %d %H:%M:%S')
+                size = str(st.st_size) if not hunman else _gethuman(st.st_size)
+                yield (mode,st.st_nlink,st.st_uid,st.st_gid,size,atime,i.name)
+
+    yield from sorted(_listdir(path,all,detail,hunman),key=lambda x: x[len(x)-1])
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    print(args)
+    parser.print_help()
+    files = listdir(args.path,args.all,args.l,args.hunman_readable)
+    print(list(files))
 
 ```
