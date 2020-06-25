@@ -5915,3 +5915,244 @@ if __name__ == '__main__':
     print(list(files))
 
 ```
+
+#### 练习
+
+#### 单词统计增加忽略单词
+
+对sample文件进行不区分大小写的单词统计，要求用户可以排除一些单词的统计，如，a,the,of等，要求代码全部使用函数封装、调用完成。
+
+```python
+def makekey(line:str,chars=set("""!"'#./\()[],*-_\r\n """)):
+    start = 0
+
+    for i,c in enumerate(line):
+        if c in chars:
+            if start == i:
+                start += 1
+                continue
+            yield line[start:i]
+            start = i+1
+    else:
+        if start < len(line):
+            yield line[start:]
+
+def wordcount(filename,encoding='utf8',ignore=(set())):
+    d = {}
+    with open(filename,encoding=encoding) as f:
+        for line in f:
+            for word in map(str.lower,makekey(line)):
+                if word not in ignore:
+                    d[word] = d.get(word,0) + 1
+    return d
+
+def top(d:dict,n=10):
+    for i,(k,v) in enumerate(sorted(d.items(),key=lambda item: item[1],reverse=True)):
+        if i > n:
+            break
+        print(k,v)
+
+top(wordcount('sample.txt',ignore={'the','a'}))
+```
+#### 转换为json文件
+
+ini文件
+```ini
+[DEFAULT]
+a = test
+
+[mysql]
+default-character-set = utf8
+
+[mysqld]
+datadir = /dbserver/data
+port = 33060
+chararcter-set-server = utf8
+sql_mode = NO_ENGINE_SUBSTITUTION,STRICT_TABLES
+```
+
+遍历ini文件字典得到json
+
+```python
+from configparser import ConfigParser
+import json
+
+filename = 'mysql.ini'
+jsonname = 'mysql.json'
+
+cfg = ConfigParser()
+cfg.read(filename)
+
+dest = {}
+
+for sect in cfg.sections():
+    print(sect,cfg.items(sect))
+    dest[sect] = dict(cfg.items(sect))
+```
+
+## 日志分析
+
+### 正则表达式
+
+#### 基本语法
+
+- 元字符metacharacter
+
+代码 | 说明 | 举例
+--- | --- | ---
+. | 匹配除换行符外任意一个字符 | .
+[abc] | 字符集合，只能表示一个字符位置，匹配所包含的任意一个字符 | [abc]--plain--a
+[^abc] | 字符集合，只能表示一个字符位置，匹配出去集合内字符的任意一个字符 | [^abc]--plain--plin
+[a-z] | 字符范围，也是一个聚合，表示一个字符位置，匹配所包含的任意一个字符 | [a-c]--plain--a
+[^a-z] |字符范围，也是一个集合，表示一个字符位置，匹配除去集合内字符的任意一个字符 | [^a-c]--plain--plin
+\b | 匹配单词的边界 | \bb b开头的b字符串 
+\B | 不匹配单词的边界 | t\B 包含t的单词但不以t结尾的t字符，例如write。\Bb不以b开头的含有b的单词，例如able。
+\d | [0-9]匹配1位数字 | \d--123abc--123
+\D | [^0-9]匹配1位非数字 | \D--123abc--abc
+\s | 匹配1位空白字符，包括换行符、制表符、空格[\f\r\n\t\v] |
+\S | 匹配1位非空白字符 |
+\w | 匹配[a-zA-Z0-9_],包含中文的字 |
+\W | 匹配\w之外的字符 |
+
+单行模式：```.```可以匹配所有字符，包括换行符。```^```表示整个字符串的开头，```$```整个字符串的结尾
+多行模式：```.```可以匹配除了换行符外的字符。```^```表示行首，行尾表示整个字符串的开始，整个字符串的结尾。开始指的是```\n```后紧接着下一个字符，结束指的是```\n```前的字符。
+
+- 转义
+凡是在正则表达式中有特殊意义的字符，如果想使用它的本意，使用```\```转义
+
+- 重复
+
+代码 | 说明 | 举例 
+--- | --- | ---
+* | 表示前面的正则表达式会重复0次或者多次 | e\w* 单词中e后面可以有非空白字符
++ | 表示前面的正则表达式重复至少1次 | e\w+ 单词中e后面至少有一个非空白字符
+? | 表示前面正则表达式或重复0次或者1次 | e\w? 单词中e后面至多有一个非空白字符
+{n} | 重复固定的n次 | e\w{1} 单词中e后面只能有一个非空白字符
+{n,} | 重复至少n次 |
+{n,m} | 重复n,m次 |
+
+```\d{11}```匹配手机号
+```\d{3,4}-\d{7,8}```匹配座机
+
+代码 | 说明 | 举例
+--- | --- | ---
+x\|y | 匹配x或者y | 
+捕获 |
+(patern) | 使用小括号指定一个子表达式，捕捉后会自动分配组号从1开始可以改变优先级 |
+\数字 | 匹配对应的分组 | 
+(?:pattern) | 如果仅仅为了改变优先权，就不需要捕获分组 |
+(?\<name>exp) (?'name'exp) | 分组捕获，但是可以通过name访问分组，Python语法必须是(?P\<name>exp) |
+零宽断言|
+(?=exp) | 零宽度正预测先行断言，断言exp一定匹配的右边出现，也就是说断言后面一定跟个exp | f(?=00) f右面一定出现oo
+(?<=exp) | 零宽度正回顾后发断言，断言exp一定匹配的左边出现，也就是说断言后面一定有个exp前缀 |
+负向零宽断言 |
+(?\|exp) | 零宽度负预测先行断言，断言exp一定不会出现在右侧，也就是说断言后面一定是exp | f(?=00) oo左面一定不是f
+(?<!exp) | 零宽度负回顾先行断言， 断言exp一定不能出现在左侧，也就是断言前面一定不能是exp |
+注释|
+(?#comment) | 注释
+断言不占分组号，断言如同条件，只是要求匹配必须满足断言的条件
+分组和捕获是同一个意思，使用正则表达式，能用简单表达式就不要复杂的表达式
+
+- 贪婪与非贪婪
+默认是贪婪模式，尽量多匹配更长的字符串，非贪婪模式是在重复的符号后面加上?，尽量少的匹配
+
+代码 | 说明 | 举例
+--- | --- | ---
+*? | 匹配任意次，但尽可能少重复 | 
++? | 匹配至少1次，但尽可能少重复 |
+?? | 匹配0次或1次，但尽可能少重复 | 
+{n,}? | 匹配至少n次，但尽可能少重复 |
+{n,m}? | 匹配至少n次，至多m次，但尽可能少重复 |
+
+引擎选项
+
+代码 | 说明 | Python
+--- | --- | ---
+IgnoreCase | 匹配时忽略大小写 | re.l re.lGNORECASE
+Singleline | 单行模式，可以匹配所有字符，包括\n | re.S re.DOTALL
+Multiline | 多行模式 ^行首 $行尾 | re.M re.MULTILINE 
+IgnorePatternWhitespace | 忽略表达式中的空白字符，如果使用空白字符用转义，#可以用来做注释 | re.x re.VERBOSE
+
+##### 练习
+
+1. 匹配一个0-999之间的任意数
+    
+    表达式 | 说明
+    ---| ---
+    \d | 1位数            
+    [1-9]?\d | 1-2位数
+    ^([1-9]\d\d?\|\d) | 1-3位数
+    ^([1-9]\d\d?\|\d)$ | 1-3位数的行 
+    ^([1-9]\d\d?\|\d)\r?$ | Windows下1-3位数的行
+    ^([1-9]\d\d?\|\d)(?!\d) | 数字开头1-3位数且之后不能是数字
+    
+2. 匹配合法IP地址
+    ``` ```
+3.选出含有ftp的连接，且文件类型是gz或者xz
+
+#### python正则表达式
+
+Python使用re模块提供正则表达式功能
+
+##### 常量
+
+常量 | 说明
+--- | ---
+re.M re.MULTILINE | 多行模式
+re.S re.DOTALL | 单行模式
+re.I re.IGNORECASE | 忽略大小写
+re.X re.VERBOSE | 忽略表达式中的空白字符
+使用\|位或运算开启多种选项
+
+##### 方法
+
+1. 编译
+
+```re.compile(pattern,flags=0)```
+设定flags，编译模式，返回正则表达式对象regex，pattern就是正则表达式字符串，flags是选项。正则表达式需要被编译，为了提高效率，这些编译后的结果被保存，下次使用同样的pattern的时候，就不需要再次编译。re的其它方法为了提高效率都调用了编译方法，就是为了提速。
+
+2. 单词匹配
+
+```re.math(pattern,string,flags=0)```
+```regex.math(string[,pos[,endpos]])```
+match匹配从字符串的开头匹配，regex对象match方法可以重设定开始位置和结束位置，返回match对象。
+
+```re.fullmatch(pattern,string,flags=0)```
+```regex.fullmatch(string[,pos,[,endpos]])```
+整个字符串和正则表达式匹配
+
+3. 全文搜索
+
+```re.findall(pattern,string,flags=0)```
+```regex.findall(string[,pos[,endpos]])```
+对整个字符串，从左到右匹配，返回所有匹配项的列表
+
+```re.finditer(pattern,string,flags=0)```
+```regec.finditer(string,[,pos[,endpos]])```
+对整个字符串，从左到右匹配，返回所有匹配项，返回迭代器。每次迭代返回的是match对象
+
+4. 匹配替换
+
+```re.sub(pattern,replacement,string,count=0,flags=0)```
+```regex.sub(replacement,string,count=0)```
+使用pattern对字符串string进行匹配，对匹配项使用repl替换，replacement可以使string、bytes、function
+
+```re.subn(pattern,replacement,string,count=0,flags=0)```
+```regex.subn(replacement,string,count=0)```
+同sub返回一个元组(new_string,number_of_subs_made)
+
+5. 分割字符串
+
+```re.split(pattern,string,maxsplit=0,flags=0)```
+
+6. 分组
+
+使用小括号的pattern捕获的数据被放到了组group中。
+match、search函数可以返回match对象，findall返回字符串列表，finditer返回一个个match对象。
+
+如果pattern中使用了分组，如果有匹配的结果，会在match对象中
+
+- 使用group(N)方式返回对应分组，1-N是对应的分组，0返回整个匹配的字符
+- 如果使用了命名分组，可以使用group('name')的方式取分组
+- 也可以使用group()返回所有组
+- 使用groupdict()返回所有命名的分组
